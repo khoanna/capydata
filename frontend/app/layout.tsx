@@ -7,6 +7,8 @@ import FooterSlide from "@/components/FooterSlide";
 import Script from "next/script";
 import CustomAnimations from "@/components/CustomAnimation";
 import Footer from "@/components/Footer";
+import ToastProvider from "@/components/Global/Toast/ToastProvider";
+import SuiProvider from "@/components/Global/Web3/SuiProvider";
 
 const space = Space_Grotesk({
   subsets: ["latin"],
@@ -34,11 +36,15 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
 
       <body
         className={`${space.variable} ${jet.variable} overflow-x-hidden selection:bg-yuzu selection:text-black`}>
-        <CustomAnimations />
-        <Navbar />
-        {children}
-        <Footer />
-        <FooterSlide />
+        <SuiProvider>
+          <ToastProvider>
+            <CustomAnimations />
+            <Navbar />
+            {children}
+            <Footer />
+            <FooterSlide />
+          </ToastProvider>
+        </SuiProvider>
       </body>
     </html>
   );
