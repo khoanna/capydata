@@ -5,3 +5,4 @@ export { default as Modal } from "./Modal";
 export { default as Input, TextArea, Select } from "./Input";
 export { default as LoadingSpinner } from "./LoadingSpinner";
 export { default as SkeletonCard } from "./SkeletonCard";
+export { default as Tooltip } from "./Tooltip";

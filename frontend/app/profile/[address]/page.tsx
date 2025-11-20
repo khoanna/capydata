@@ -27,7 +27,7 @@ export default function ProfilePage({
         {/* Identity Header */}
         <IdentityHeader address={address} />
 
-        {/* Tabs */}
+        {/* Tabs - Reduced margin for better visual connection */}
         <div className="mb-8 reveal delay-200">
           <div className="flex items-center gap-2 border-b border-white/10">
             {tabs.map((tab) => (

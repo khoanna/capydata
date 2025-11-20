@@ -1,11 +1,13 @@
 "use client";
 import { Calendar, CheckCircle, Copy, Github, Globe, Settings, Share2, Star, Twitter, UserPlus } from "lucide-react";
 
-import { truncateAddress, stringToColor, copyToClipboard } from "@/lib/utils";
+import { truncateAddress, generateAvatarUrl, copyToClipboard, capyToUSD, formatUSD } from "@/lib/utils";
 import { useToast } from "@/hooks/useToast";
 import Badge from "@/components/Common/Badge";
 import Button from "@/components/Common/Button";
+import Tooltip from "@/components/Common/Tooltip";
 import { useCurrentAccount } from "@mysten/dapp-kit";
+import Image from "next/image";
 
 interface IdentityHeaderProps {
   address: string;
@@ -16,8 +18,8 @@ const IdentityHeader = ({ address }: IdentityHeaderProps) => {
   const currentAccount = useCurrentAccount();
   const isOwnProfile = currentAccount?.address === address;
 
-  // Generate avatar gradient from address
-  const avatarGradient = stringToColor(address);
+  // Generate avatar URL from address using DiceBear
+  const avatarUrl = generateAvatarUrl(address);
 
   // Mock user data
   const userData = {
@@ -61,16 +63,19 @@ const IdentityHeader = ({ address }: IdentityHeaderProps) => {
   };
 
   return (
-    <div className="mb-12 reveal">
+    <div className="mb-8 reveal">
       <div className="glass-card p-8 rounded-lg">
         <div className="flex flex-col md:flex-row gap-8">
-          {/* Avatar */}
+          {/* Avatar - Using DiceBear Pixel Art (Blockies/Jazzicons style) */}
           <div className="shrink-0">
-            <div
-              className="w-32 h-32 rounded-full flex items-center justify-center text-4xl font-sans font-bold text-white border-4 border-white/10"
-              style={{ background: avatarGradient }}
-            >
-              {userData.username.slice(0, 2).toUpperCase()}
+            <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white/10 bg-panel">
+              <Image
+                src={avatarUrl}
+                alt={`${userData.username} avatar`}
+                width={128}
+                height={128}
+                className="w-full h-full"
+              />
             </div>
           </div>
 
@@ -83,17 +88,19 @@ const IdentityHeader = ({ address }: IdentityHeaderProps) => {
                     {userData.username}
                   </h1>
                   {userData.verified && (
-                    <Badge variant="success" size="md">
-                      <CheckCircle className="w-4 h-4" />
-                      Verified
-                    </Badge>
+                    <Tooltip content="Identity verified via GitHub" position="top">
+                      <Badge variant="success" size="md">
+                        <CheckCircle className="w-4 h-4" />
+                        Verified
+                      </Badge>
+                    </Tooltip>
                   )}
                 </div>
 
-                {/* Address */}
+                {/* Address with Copy Button */}
                 <button
                   onClick={handleCopyAddress}
-                  className="flex items-center gap-2 group mb-3"
+                  className="flex items-center gap-2 group mb-2"
                 >
                   <span className="font-mono text-sm text-gray-400 group-hover:text-yuzu transition-colors">
                     {truncateAddress(address)}
@@ -101,7 +108,14 @@ const IdentityHeader = ({ address }: IdentityHeaderProps) => {
                   <Copy className="w-3 h-3 text-gray-500 group-hover:text-yuzu transition-colors" />
                 </button>
 
-                <p className="font-mono text-sm text-gray-400 max-w-2xl leading-relaxed">
+                {/* Joined Date - Separated for better visual hierarchy */}
+                <div className="flex items-center gap-1.5 text-gray-500 mb-4">
+                  <Calendar className="w-3 h-3" />
+                  <span className="font-mono text-xs">Joined {userData.joinedDate}</span>
+                </div>
+
+                {/* Bio with max-width for better readability */}
+                <p className="font-mono text-sm text-gray-400 max-w-[60ch] leading-relaxed">
                   {userData.bio}
                 </p>
               </div>
@@ -109,7 +123,7 @@ const IdentityHeader = ({ address }: IdentityHeaderProps) => {
               {/* Actions */}
               <div className="flex items-center gap-2 shrink-0">
                 {isOwnProfile ? (
-                  <Button variant="outline" size="md">
+                  <Button variant="primary" size="md">
                     <Settings className="w-4 h-4" />
                     Edit Profile
                   </Button>
@@ -119,38 +133,41 @@ const IdentityHeader = ({ address }: IdentityHeaderProps) => {
                     Follow
                   </Button>
                 )}
-                <Button variant="ghost" size="md" onClick={handleShare}>
+                <Button variant="outline" size="md" onClick={handleShare}>
                   <Share2 className="w-4 h-4" />
                 </Button>
               </div>
             </div>
 
-            {/* Stats Grid */}
+            {/* Stats Grid - Improved contrast and clarity */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
               <div className="p-4 glass-input rounded-lg">
-                <p className="font-mono text-xs text-gray-400 mb-1">Published</p>
+                <p className="font-mono text-xs text-gray-300 mb-1">Published</p>
                 <p className="font-sans text-2xl font-bold text-white">
                   {userData.stats.published}
                 </p>
               </div>
               <div className="p-4 glass-input rounded-lg">
-                <p className="font-mono text-xs text-gray-400 mb-1">Downloads</p>
+                <p className="font-mono text-xs text-gray-300 mb-1">Downloads</p>
                 <p className="font-sans text-2xl font-bold text-hydro">
                   {userData.stats.downloads}
                 </p>
               </div>
               <div className="p-4 glass-input rounded-lg">
-                <p className="font-mono text-xs text-gray-400 mb-1">Total Earned</p>
+                <p className="font-mono text-xs text-gray-300 mb-1">Total Earned</p>
                 <p className="font-sans text-2xl font-bold text-yuzu">
                   {userData.stats.earned.toLocaleString()}
                   <span className="text-sm ml-1">CAPY</span>
                 </p>
+                <p className="font-mono text-xs text-gray-500 mt-1">
+                  ≈ {formatUSD(capyToUSD(userData.stats.earned))}
+                </p>
               </div>
               <div className="p-4 glass-input rounded-lg">
-                <p className="font-mono text-xs text-gray-400 mb-1">Reputation</p>
+                <p className="font-mono text-xs text-gray-300 mb-1">Reputation</p>
                 <div className="flex items-center gap-2">
                   <p className="font-sans text-2xl font-bold text-grass">
-                    {userData.stats.reputation}
+                    {userData.stats.reputation}<span className="text-base text-gray-500">/100</span>
                   </p>
                   <div className="flex">
                     {[1, 2, 3, 4, 5].map((star) => (
@@ -168,13 +185,8 @@ const IdentityHeader = ({ address }: IdentityHeaderProps) => {
               </div>
             </div>
 
-            {/* Socials & Metadata */}
+            {/* Social Links - Increased spacing from metadata */}
             <div className="flex flex-wrap items-center gap-4 text-xs">
-              <div className="flex items-center gap-1.5 text-gray-500">
-                <Calendar className="w-3 h-3" />
-                <span className="font-mono">Joined {userData.joinedDate}</span>
-              </div>
-
               {userData.socials.twitter && (
                 <a
                   href={`https://twitter.com/${userData.socials.twitter.replace("@", "")}`}

@@ -9,6 +9,8 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@dicebear/collection": "^9.2.4",
+    "@dicebear/core": "^9.2.4",
     "@mysten/dapp-kit": "^0.19.9",
     "@mysten/sui": "^1.45.0",
     "@rainbow-me/rainbowkit": "^2.2.9",

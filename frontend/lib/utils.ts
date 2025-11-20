@@ -129,3 +129,9 @@ export const generateDID = (): string => {
   ).join("");
   return `did:op:0x${hex}`;
 };
+
+// Generate avatar URL using DiceBear (Pixel Art style)
+export const generateAvatarUrl = (seed: string): string => {
+  // Using DiceBear's pixel-art style (similar to Blockies/Jazzicons)
+  return `https://api.dicebear.com/9.x/pixel-art/svg?seed=${encodeURIComponent(seed)}`;
+};
