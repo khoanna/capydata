@@ -220,7 +220,7 @@ const AssetLocationStep = ({ formData, updateFormData }: AssetLocationStepProps)
           ) : (
             <div className="glass-card p-6 rounded-lg">
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-lg bg-yuzu/20 flex items-center justify-center flex-shrink-0">
+                <div className="w-12 h-12 rounded-lg bg-yuzu/20 flex items-center justify-center shrink-0">
                   <File className="w-6 h-6 text-yuzu" />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -233,7 +233,7 @@ const AssetLocationStep = ({ formData, updateFormData }: AssetLocationStepProps)
                   <div className="mt-3 flex items-center gap-2">
                     <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-gradient-to-r from-yuzu to-hydro animate-shimmer"
+                        className="h-full bg-linear-to-r from-yuzu to-hydro animate-shimmer"
                         style={{ width: "100%" }}
                       ></div>
                     </div>
@@ -257,7 +257,7 @@ const AssetLocationStep = ({ formData, updateFormData }: AssetLocationStepProps)
       {/* Encryption Notice */}
       <div className="p-4 glass-input rounded-lg border border-hydro/30">
         <div className="flex items-start gap-3">
-          <Lock className="w-5 h-5 text-hydro mt-0.5 flex-shrink-0" />
+          <Lock className="w-5 h-5 text-hydro mt-0.5 shrink-0" />
           <div>
             <p className="font-mono text-sm text-white mb-2 font-bold">
               Seal Protocol Encryption
@@ -274,7 +274,7 @@ const AssetLocationStep = ({ formData, updateFormData }: AssetLocationStepProps)
       {formData.locationType === "upload" && (
         <div className="p-4 glass-input rounded-lg border border-grass/30">
           <div className="flex items-start gap-3">
-            <Database className="w-5 h-5 text-grass mt-0.5 flex-shrink-0" />
+            <Database className="w-5 h-5 text-grass mt-0.5 shrink-0" />
             <div>
               <p className="font-mono text-sm text-white mb-2 font-bold">
                 Walrus Decentralized Storage

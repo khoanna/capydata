@@ -126,7 +126,7 @@ const DeployProgress = ({ formData }: DeployProgressProps) => {
               <div
                 className={`absolute left-6 top-14 w-0.5 h-12 transition-all duration-500 ${
                   step.status === "complete"
-                    ? "bg-gradient-to-b from-success to-success/50"
+                    ? "bg-linear-to-b from-success to-success/50"
                     : "bg-white/10"
                 }`}
               ></div>
@@ -135,7 +135,7 @@ const DeployProgress = ({ formData }: DeployProgressProps) => {
             <div className="flex items-start gap-4">
               {/* Step Icon */}
               <div
-                className={`w-12 h-12 rounded-full flex items-center justify-center border-2 transition-all duration-500 flex-shrink-0 ${
+                className={`w-12 h-12 rounded-full flex items-center justify-center border-2 transition-all duration-500 shrink-0 ${
                   step.status === "complete"
                     ? "border-success bg-success/20 scale-110"
                     : step.status === "processing"
@@ -180,12 +180,12 @@ const DeployProgress = ({ formData }: DeployProgressProps) => {
 
                   {/* Status Badge */}
                   {step.status === "processing" && (
-                    <span className="px-2 py-1 bg-yuzu/20 border border-yuzu/30 rounded text-yuzu font-mono text-xs flex-shrink-0">
+                    <span className="px-2 py-1 bg-yuzu/20 border border-yuzu/30 rounded text-yuzu font-mono text-xs shrink-0">
                       Processing...
                     </span>
                   )}
                   {step.status === "complete" && (
-                    <span className="px-2 py-1 bg-success/20 border border-success/30 rounded text-success font-mono text-xs flex-shrink-0">
+                    <span className="px-2 py-1 bg-success/20 border border-success/30 rounded text-success font-mono text-xs shrink-0">
                       Complete
                     </span>
                   )}

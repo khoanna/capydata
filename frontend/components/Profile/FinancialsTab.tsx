@@ -235,7 +235,7 @@ const FinancialsTab = ({ address }: FinancialsTabProps) => {
               <div key={i} className="flex-1 flex flex-col items-center gap-2">
                 <div className="relative w-full group">
                   <div
-                    className="w-full bg-gradient-to-t from-yuzu to-hydro rounded-t opacity-70 hover:opacity-100 transition-all cursor-pointer"
+                    className="w-full bg-linear-to-t from-yuzu to-hydro rounded-t opacity-70 hover:opacity-100 transition-all cursor-pointer"
                     style={{ height: `${height * 1.5}px` }}
                   ></div>
                   <div className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
@@ -269,7 +269,7 @@ const FinancialsTab = ({ address }: FinancialsTabProps) => {
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   <div
-                    className={`w-10 h-10 rounded-full bg-white/5 flex items-center justify-center flex-shrink-0 ${getTransactionColor(tx.type)}`}
+                    className={`w-10 h-10 rounded-full bg-white/5 flex items-center justify-center shrink-0 ${getTransactionColor(tx.type)}`}
                   >
                     {getTransactionIcon(tx.type)}
                   </div>
@@ -294,7 +294,7 @@ const FinancialsTab = ({ address }: FinancialsTabProps) => {
                     </div>
                   </div>
                 </div>
-                <div className="text-right flex-shrink-0">
+                <div className="text-right shrink-0">
                   <p className={`font-mono text-sm font-bold ${getTransactionColor(tx.type)}`}>
                     {tx.type === "stake" ? "-" : "+"}{formatPrice(tx.amount, "CAPY", 0)}
                   </p>
@@ -318,7 +318,7 @@ const FinancialsTab = ({ address }: FinancialsTabProps) => {
       {/* Earning Tips */}
       <div className="glass-card p-6 rounded-lg border border-info/30">
         <div className="flex items-start gap-3">
-          <Lightbulb className="w-5 h-5 text-info flex-shrink-0 mt-0.5" />
+          <Lightbulb className="w-5 h-5 text-info shrink-0 mt-0.5" />
           <div>
             <p className="font-mono text-sm text-white mb-3 font-bold">
               Maximize Your Earnings
@@ -331,7 +331,7 @@ const FinancialsTab = ({ address }: FinancialsTabProps) => {
                 "Engage with the community to build reputation and visibility",
               ].map((tip, i) => (
                 <li key={i} className="flex items-start gap-2">
-                  <Check className="w-3 h-3 text-success mt-0.5 flex-shrink-0" />
+                  <Check className="w-3 h-3 text-success mt-0.5 shrink-0" />
                   <span className="font-mono text-xs text-gray-400 leading-relaxed">
                     {tip}
                   </span>

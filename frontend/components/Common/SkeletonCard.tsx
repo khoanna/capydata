@@ -53,7 +53,7 @@ const SkeletonCard = ({ variant = "asset", className = "" }: SkeletonCardProps) 
   return (
     <div className={`glass-card p-4 flex gap-4 ${className}`}>
       {/* Icon/Thumbnail */}
-      <div className="w-16 h-16 skeleton rounded-lg flex-shrink-0" />
+      <div className="w-16 h-16 skeleton rounded-lg shrink-0" />
 
       {/* Content */}
       <div className="flex-1 space-y-2">

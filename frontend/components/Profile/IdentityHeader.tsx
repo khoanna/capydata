@@ -65,7 +65,7 @@ const IdentityHeader = ({ address }: IdentityHeaderProps) => {
       <div className="glass-card p-8 rounded-lg">
         <div className="flex flex-col md:flex-row gap-8">
           {/* Avatar */}
-          <div className="flex-shrink-0">
+          <div className="shrink-0">
             <div
               className="w-32 h-32 rounded-full flex items-center justify-center text-4xl font-sans font-bold text-white border-4 border-white/10"
               style={{ background: avatarGradient }}
@@ -107,7 +107,7 @@ const IdentityHeader = ({ address }: IdentityHeaderProps) => {
               </div>
 
               {/* Actions */}
-              <div className="flex items-center gap-2 flex-shrink-0">
+              <div className="flex items-center gap-2 shrink-0">
                 {isOwnProfile ? (
                   <Button variant="outline" size="md">
                     <Settings className="w-4 h-4" />

@@ -64,7 +64,7 @@ const Toast = ({ toast, onClose }: ToastProps) => {
     >
       <div className="flex items-start gap-3">
         {/* Icon */}
-        <div className={`${config.textColor} flex-shrink-0 mt-0.5`}>
+        <div className={`${config.textColor} shrink-0 mt-0.5`}>
           {config.icon}
         </div>
 
@@ -88,7 +88,7 @@ const Toast = ({ toast, onClose }: ToastProps) => {
         {/* Close Button */}
         <button
           onClick={handleClose}
-          className="text-gray-400 hover:text-white transition-colors flex-shrink-0"
+          className="text-gray-400 hover:text-white transition-colors shrink-0"
           aria-label="Close notification"
         >
           <X className="w-4 h-4" />

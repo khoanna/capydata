@@ -104,7 +104,7 @@ const MetadataStep = ({ formData, updateFormData }: MetadataStepProps) => {
           />
           <button
             onClick={handleAddTag}
-            className="px-4 py-3 glass-input rounded-lg hover:border-yuzu/50 transition-all flex items-center gap-2 font-mono text-sm text-white flex-shrink-0"
+            className="px-4 py-3 glass-input rounded-lg hover:border-yuzu/50 transition-all flex items-center gap-2 font-mono text-sm text-white shrink-0"
           >
             <Plus className="w-4 h-4" />
             Add

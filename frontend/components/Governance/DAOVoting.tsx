@@ -277,11 +277,11 @@ const DAOVoting = () => {
                     </div>
                     <div className="relative h-2 bg-white/5 rounded-full overflow-hidden">
                       <div
-                        className="absolute inset-y-0 left-0 bg-gradient-to-r from-success to-success/80 transition-all"
+                        className="absolute inset-y-0 left-0 bg-linear-to-r from-success to-success/80 transition-all"
                         style={{ width: `${progress}%` }}
                       ></div>
                       <div
-                        className="absolute inset-y-0 right-0 bg-gradient-to-l from-error to-error/80 transition-all"
+                        className="absolute inset-y-0 right-0 bg-linear-to-l from-error to-error/80 transition-all"
                         style={{ width: `${100 - progress}%` }}
                       ></div>
                     </div>
@@ -402,7 +402,7 @@ const DAOVoting = () => {
       {/* Governance Info */}
       <div className="glass-card p-6 rounded-lg border border-info/30">
         <div className="flex items-start gap-3">
-          <Info className="w-5 h-5 text-info flex-shrink-0 mt-0.5" />
+          <Info className="w-5 h-5 text-info shrink-0 mt-0.5" />
           <div>
             <h3 className="font-mono text-sm text-white mb-3 font-bold">
               About DAO Governance
@@ -416,7 +416,7 @@ const DAOVoting = () => {
                 "Passed proposals are implemented by the core team within 30 days",
               ].map((point, i) => (
                 <li key={i} className="flex items-start gap-2">
-                  <Check className="w-3 h-3 text-success mt-0.5 flex-shrink-0" />
+                  <Check className="w-3 h-3 text-success mt-0.5 shrink-0" />
                   <span className="font-mono text-xs text-gray-400 leading-relaxed">
                     {point}
                   </span>
