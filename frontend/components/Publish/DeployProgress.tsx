@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/useToast";
 
 interface DeployProgressProps {
   formData: PublishFormData;
+  onComplete?: () => void;
 }
 
 type DeployStep = {
@@ -21,7 +22,7 @@ type DeployStep = {
   txHash?: string;
 };
 
-const DeployProgress = ({ formData }: DeployProgressProps) => {
+const DeployProgress = ({ formData, onComplete }: DeployProgressProps) => {
   const router = useRouter();
   const { addToast } = useToast();
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -97,6 +98,11 @@ const DeployProgress = ({ formData }: DeployProgressProps) => {
     setGeneratedDID(did);
     setDeploymentComplete(true);
     addToast("Dataset published successfully!", "success");
+    
+    // Call onComplete callback if provided
+    if (onComplete) {
+      onComplete();
+    }
   };
 
   const handleViewDataset = () => {

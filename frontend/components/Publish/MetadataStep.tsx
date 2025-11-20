@@ -71,23 +71,6 @@ const MetadataStep = ({ formData, updateFormData }: MetadataStepProps) => {
         className="min-h-[150px]"
       />
 
-      <Select
-        label="Category *"
-        value={formData.category}
-        onChange={(e) => updateFormData({ category: e.target.value })}
-        options={categories}
-        hint="Select the primary category for your dataset"
-      />
-
-      <Input
-        label="Author"
-        placeholder="Your name or organization"
-        value={formData.author}
-        onChange={(e) => updateFormData({ author: e.target.value })}
-        hint="This will be publicly displayed"
-        icon={<User className="w-4 h-4" />}
-      />
-
       {/* Tags */}
       <div>
         <label className="block font-mono text-xs text-gray-400 mb-2 tracking-wide">

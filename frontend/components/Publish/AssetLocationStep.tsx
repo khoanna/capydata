@@ -1,8 +1,7 @@
 "use client";
-import { Check, Database, DollarSign, File, FileText, Globe, Hash, Link, Loader, Lock, Settings, Shield, Upload, UploadCloud, X, Cloud, Archive } from "lucide-react";
+import { Check, FileText, Lock, UploadCloud, X } from "lucide-react";
 
 import { PublishFormData } from "./PublishWizard";
-import { Input } from "@/components/Common/Input";
 import { useState } from "react";
 import { formatFileSize } from "@/lib/utils";
 
@@ -14,39 +13,13 @@ interface AssetLocationStepProps {
 const AssetLocationStep = ({ formData, updateFormData }: AssetLocationStepProps) => {
   const [isDragging, setIsDragging] = useState(false);
 
-  const storageOptions = [
-    {
-      type: "url" as const,
-      icon: <Link className="w-6 h-6" />,
-      label: "URL",
-      description: "Link to data hosted elsewhere",
-    },
-    {
-      type: "ipfs" as const,
-      icon: <Cloud className="w-6 h-6" />,
-      label: "IPFS",
-      description: "InterPlanetary File System CID",
-    },
-    {
-      type: "arweave" as const,
-      icon: <Archive className="w-6 h-6" />,
-      label: "Arweave",
-      description: "Permanent storage transaction ID",
-    },
-    {
-      type: "upload" as const,
-      icon: <Upload className="w-6 h-6" />,
-      label: "Upload File",
-      description: "Upload to Walrus network",
-    },
-  ];
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       updateFormData({
         uploadedFile: file,
-        locationValue: file.name
+        filename: file.name,
+        filetype: file.type || "application/octet-stream"
       });
     }
   };
@@ -77,7 +50,8 @@ const AssetLocationStep = ({ formData, updateFormData }: AssetLocationStepProps)
     if (file) {
       updateFormData({
         uploadedFile: file,
-        locationValue: file.name
+        filename: file.name,
+        filetype: file.type || "application/octet-stream"
       });
     }
   };
@@ -85,7 +59,8 @@ const AssetLocationStep = ({ formData, updateFormData }: AssetLocationStepProps)
   const handleRemoveFile = () => {
     updateFormData({
       uploadedFile: undefined,
-      locationValue: ""
+      filename: "",
+      filetype: ""
     });
   };
 
@@ -93,200 +68,66 @@ const AssetLocationStep = ({ formData, updateFormData }: AssetLocationStepProps)
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-sans font-bold text-white mb-2">
-          Asset Location
+          Upload File
         </h2>
         <p className="font-mono text-sm text-gray-400">
-          Specify where your dataset is stored. All data will be encrypted with Seal protocol.
+          Upload your dataset file. All data will be encrypted with Seal protocol before being stored on Walrus network.
         </p>
       </div>
 
-      {/* Storage Type Selection */}
-      <div>
-        <label className="block font-mono text-xs text-gray-400 mb-3 tracking-wide">
-          Storage Type *
-        </label>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {storageOptions.map((option) => (
-            <button
-              key={option.type}
-              onClick={() => updateFormData({ locationType: option.type })}
-              className={`p-4 rounded-lg border-2 transition-all text-left group ${
-                formData.locationType === option.type
-                  ? "border-yuzu bg-yuzu/10"
-                  : "border-white/10 glass-input hover:border-yuzu/50"
-              }`}
-            >
-              {option.icon}
-              <p
-                className={`font-mono text-sm font-bold mb-1 transition-colors ${
-                  formData.locationType === option.type
-                    ? "text-yuzu"
-                    : "text-white"
-                }`}
-              >
-                {option.label}
-              </p>
-              <p className="font-mono text-xs text-gray-500">
-                {option.description}
-              </p>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* URL Input */}
-      {formData.locationType === "url" && (
-        <Input
-          label="Data URL *"
-          placeholder="https://example.com/dataset.csv"
-          value={formData.locationValue}
-          onChange={(e) => updateFormData({ locationValue: e.target.value })}
-          hint="Must be publicly accessible or use authentication headers"
-          icon={<Globe className="w-4 h-4" />}
-        />
-      )}
-
-      {/* IPFS Input */}
-      {formData.locationType === "ipfs" && (
-        <Input
-          label="IPFS CID *"
-          placeholder="QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco"
-          value={formData.locationValue}
-          onChange={(e) => updateFormData({ locationValue: e.target.value })}
-          hint="Content Identifier on IPFS network"
-          icon={<Hash className="w-4 h-4" />}
-        />
-      )}
-
-      {/* Arweave Input */}
-      {formData.locationType === "arweave" && (
-        <Input
-          label="Arweave TX ID *"
-          placeholder="6I-wDvp-bSZdBS_LrfAVgdFI6K6B5N5C3f6l1XvZ5nU"
-          value={formData.locationValue}
-          onChange={(e) => updateFormData({ locationValue: e.target.value })}
-          hint="Transaction ID on Arweave network"
-          icon={<Shield className="w-4 h-4" />}
-        />
-      )}
-
-      {/* File Upload */}
-      {formData.locationType === "upload" && (
-        <div>
-          <label className="block font-mono text-xs text-gray-400 mb-2 tracking-wide">
-            Upload File *
-          </label>
-
-          {!formData.uploadedFile ? (
-            <div
-              onDragEnter={handleDragEnter}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              className={`relative border-2 border-dashed rounded-lg p-12 text-center transition-all cursor-pointer group ${
-                isDragging
-                  ? "border-yuzu bg-yuzu/10 scale-105"
-                  : "border-white/20 glass-input hover:border-yuzu/50"
-              }`}
-            >
-              <input
-                type="file"
-                onChange={handleFileChange}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-              />
-              <div className="flex flex-col items-center">
-                <div
-                  className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 transition-all ${
-                    isDragging
-                      ? "bg-yuzu/20 scale-110"
-                      : "bg-white/5 group-hover:bg-yuzu/10"
-                  }`}
-                >
-                  <UploadCloud className={`w-8 h-8 transition-colors ${
-                      isDragging
-                        ? "text-yuzu"
-                        : "text-gray-400 group-hover:text-yuzu"
-                    }`} />
-                </div>
-                <p className="font-mono text-sm text-white mb-2">
-                  Drop your file here, or{" "}
-                  <span className="text-yuzu">browse</span>
-                </p>
-                <p className="font-mono text-xs text-gray-500">
-                  Supports: CSV, JSON, Parquet, HDF5, ZIP (max 5GB)
-                </p>
-              </div>
+      {!formData.uploadedFile ? (
+        <div
+          onDragEnter={handleDragEnter}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          className={`relative border-2 border-dashed rounded-lg p-12 text-center transition-all ${isDragging ? "border-yuzu bg-yuzu/10" : "border-white/20 hover:border-yuzu/50 bg-white/5"}`}
+        >
+          <input type="file" id="file-upload" onChange={handleFileChange} className="hidden" accept=".csv,.json,.parquet,.hdf5,.zip" />
+          <label htmlFor="file-upload" className="cursor-pointer flex flex-col items-center">
+            <div className="w-16 h-16 rounded-full bg-yuzu/20 flex items-center justify-center mb-4">
+              <UploadCloud className="w-8 h-8 text-yuzu" />
             </div>
-          ) : (
-            <div className="glass-card p-6 rounded-lg">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-lg bg-yuzu/20 flex items-center justify-center shrink-0">
-                  <File className="w-6 h-6 text-yuzu" />
-                </div>
+            <p className="font-sans text-lg font-bold text-white mb-2">
+              Drop your file here, or <span className="text-yuzu">browse</span>
+            </p>
+            <p className="font-mono text-xs text-gray-400">Supports: CSV, JSON, Parquet, HDF5, ZIP (max 5GB)</p>
+          </label>
+        </div>
+      ) : (
+        <div className="glass-card p-6 rounded-lg border border-success/30">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-lg bg-success/20 flex items-center justify-center shrink-0">
+              <FileText className="w-6 h-6 text-success" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start justify-between gap-4 mb-2">
                 <div className="flex-1 min-w-0">
-                  <p className="font-mono text-sm text-white font-bold mb-1 truncate">
-                    {formData.uploadedFile.name}
-                  </p>
-                  <p className="font-mono text-xs text-gray-400">
-                    {formatFileSize(formData.uploadedFile.size)}
-                  </p>
-                  <div className="mt-3 flex items-center gap-2">
-                    <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-linear-to-r from-yuzu to-hydro animate-shimmer"
-                        style={{ width: "100%" }}
-                      ></div>
-                    </div>
-                    <span className="font-mono text-xs text-success">
-                      Ready
-                    </span>
-                  </div>
+                  <p className="font-sans font-bold text-white truncate">{formData.uploadedFile.name}</p>
+                  <p className="font-mono text-xs text-gray-400">{formatFileSize(formData.uploadedFile.size)} • {formData.filetype}</p>
                 </div>
-                <button
-                  onClick={handleRemoveFile}
-                  className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                >
-                  <X className="w-5 h-5 text-gray-400" />
+                <button onClick={handleRemoveFile} className="p-2 hover:bg-error/10 rounded-lg transition-colors shrink-0">
+                  <X className="w-4 h-4 text-gray-400 hover:text-error" />
                 </button>
               </div>
+              <div className="flex items-center gap-2 text-success">
+                <Check className="w-4 h-4" />
+                <span className="font-mono text-xs">Ready to upload</span>
+              </div>
             </div>
-          )}
+          </div>
         </div>
       )}
 
-      {/* Encryption Notice */}
-      <div className="p-4 glass-input rounded-lg border border-hydro/30">
+      <div className="p-4 glass-input rounded-lg border border-info/30">
         <div className="flex items-start gap-3">
-          <Lock className="w-5 h-5 text-hydro mt-0.5 shrink-0" />
+          <Lock className="w-5 h-5 text-info mt-0.5 shrink-0" />
           <div>
-            <p className="font-mono text-sm text-white mb-2 font-bold">
-              Seal Protocol Encryption
-            </p>
-            <p className="font-mono text-xs text-gray-400 leading-relaxed">
-              Your data will be encrypted using Seal protocol before being stored.
-              Only buyers with access tokens can decrypt and view the content.
-            </p>
+            <p className="font-mono text-sm text-white mb-2 font-bold">Seal Protocol Encryption</p>
+            <p className="font-mono text-xs text-gray-400 leading-relaxed">Your data will be encrypted using Seal protocol before being stored. Only buyers with valid access tokens can decrypt and view the content.</p>
           </div>
         </div>
       </div>
-
-      {/* Walrus Storage Notice (for uploads) */}
-      {formData.locationType === "upload" && (
-        <div className="p-4 glass-input rounded-lg border border-grass/30">
-          <div className="flex items-start gap-3">
-            <Database className="w-5 h-5 text-grass mt-0.5 shrink-0" />
-            <div>
-              <p className="font-mono text-sm text-white mb-2 font-bold">
-                Walrus Decentralized Storage
-              </p>
-              <p className="font-mono text-xs text-gray-400 leading-relaxed">
-                Files will be uploaded to the Walrus network for decentralized,
-                redundant storage. Storage fees are included in the listing price.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

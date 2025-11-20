@@ -1,18 +1,20 @@
-import {decrypt, encrypt} from "@/services/seal";
-import {fetchBlobFromWalrus, uploadFileToWalrus} from "@/services/walrus";
 import {useState} from "react";
+import useSeal from "./useSeal";
+import useWalrus from "./useWalrus";
 
 export default function useMarketplace() {
   const [loading, setLoading] = useState(false);
+  const {encrypt, decrypt} = useSeal();
+  const {uploadFileToWalrus, fetchBlobFromWalrus} = useWalrus();
 
-  const uploadFile = async (file: File) => {
+  const uploadFile = async (file: File, title: string, filename: string, filetype: string, description: string, tags: string[], price: number, release_date: number) => {
     setLoading(true);
     try {
       const encryptedBytes = await encrypt(
         new Uint8Array(await file.arrayBuffer())
       );
       const blobId = await uploadFileToWalrus(encryptedBytes, file.name);
-      return blobId;
+      // more logic can be added here if needed
     } catch (error) {
       throw error;
     } finally {

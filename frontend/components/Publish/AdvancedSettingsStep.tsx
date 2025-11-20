@@ -119,7 +119,7 @@ const AdvancedSettingsStep = ({ formData, updateFormData }: AdvancedSettingsStep
       {formData.accessType === "compute" && (
         <div className="glass-card p-6 rounded-lg border border-hydro/30 space-y-6">
           <div className="flex items-start gap-3">
-            <ShieldCheck className="w-6 h-6 text-hydro flex-shrink-0" />
+            <ShieldCheck className="w-6 h-6 text-hydro shrink-0" />
             <div>
               <h3 className="font-sans font-bold text-white mb-2">
                 Compute-to-Data Configuration
@@ -146,7 +146,7 @@ const AdvancedSettingsStep = ({ formData, updateFormData }: AdvancedSettingsStep
               />
               <button
                 onClick={handleAddAlgorithm}
-                className="px-4 py-3 glass-input rounded-lg hover:border-yuzu/50 transition-all flex items-center gap-2 font-mono text-sm text-white flex-shrink-0"
+                className="px-4 py-3 glass-input rounded-lg hover:border-yuzu/50 transition-all flex items-center gap-2 font-mono text-sm text-white shrink-0"
               >
                 <Plus className="w-4 h-4" />
                 Add
@@ -161,14 +161,14 @@ const AdvancedSettingsStep = ({ formData, updateFormData }: AdvancedSettingsStep
                     className="flex items-center justify-between p-3 glass-input rounded-lg"
                   >
                     <div className="flex items-center gap-2 flex-1 min-w-0">
-                      <Cpu className="w-4 h-4 text-hydro flex-shrink-0" />
+                      <Cpu className="w-4 h-4 text-hydro shrink-0" />
                       <span className="font-mono text-xs text-white truncate">
                         {did}
                       </span>
                     </div>
                     <button
                       onClick={() => handleRemoveAlgorithm(did)}
-                      className="ml-2 p-1 hover:bg-white/10 rounded transition-colors flex-shrink-0"
+                      className="ml-2 p-1 hover:bg-white/10 rounded transition-colors shrink-0"
                     >
                       <X className="w-4 h-4 text-gray-400" />
                     </button>
@@ -204,7 +204,7 @@ const AdvancedSettingsStep = ({ formData, updateFormData }: AdvancedSettingsStep
           </div>
           <button
             onClick={() => updateFormData({ sampleAvailable: !formData.sampleAvailable })}
-            className={`relative w-14 h-7 rounded-full transition-all flex-shrink-0 ${
+            className={`relative w-14 h-7 rounded-full transition-all shrink-0 ${
               formData.sampleAvailable ? "bg-grass" : "bg-white/20"
             }`}
           >
@@ -237,7 +237,7 @@ const AdvancedSettingsStep = ({ formData, updateFormData }: AdvancedSettingsStep
           />
           <button
             onClick={handleAddToAllowList}
-            className="px-4 py-3 glass-input rounded-lg hover:border-yuzu/50 transition-all flex items-center gap-2 font-mono text-sm text-white flex-shrink-0"
+            className="px-4 py-3 glass-input rounded-lg hover:border-yuzu/50 transition-all flex items-center gap-2 font-mono text-sm text-white shrink-0"
           >
             <Plus className="w-4 h-4" />
             Add
@@ -269,17 +269,34 @@ const AdvancedSettingsStep = ({ formData, updateFormData }: AdvancedSettingsStep
       </div>
 
       {/* Expiration Date */}
-      <div>
-        <label className="block font-mono text-xs text-gray-400 mb-2 tracking-wide">
-          Listing Expiration (Optional)
-        </label>
-        <Input
-          type="date"
-          value={formData.expirationDate || ""}
-          onChange={(e) => updateFormData({ expirationDate: e.target.value })}
-          hint="Leave empty for permanent listing"
-          icon={<Calendar className="w-4 h-4" />}
-        />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block font-mono text-xs text-gray-400 mb-2 tracking-wide">
+            Release Date (Optional)
+          </label>
+          <Input
+            type="date"
+            value={formData.releaseDate ? new Date(formData.releaseDate).toISOString().split('T')[0] : ""}
+            onChange={(e) => {
+              const date = e.target.value ? new Date(e.target.value).getTime() : Date.now();
+              updateFormData({ releaseDate: date });
+            }}
+            hint="When was this dataset created/collected?"
+            icon={<Calendar className="w-4 h-4" />}
+          />
+        </div>
+        <div>
+          <label className="block font-mono text-xs text-gray-400 mb-2 tracking-wide">
+            Listing Expiration (Optional)
+          </label>
+          <Input
+            type="date"
+            value={formData.expirationDate || ""}
+            onChange={(e) => updateFormData({ expirationDate: e.target.value })}
+            hint="Leave empty for permanent listing"
+            icon={<Calendar className="w-4 h-4" />}
+          />
+        </div>
       </div>
 
       {/* Privacy & Security Notice */}
@@ -298,7 +315,7 @@ const AdvancedSettingsStep = ({ formData, updateFormData }: AdvancedSettingsStep
                 "You can revoke access or update settings anytime",
               ].map((point, i) => (
                 <li key={i} className="flex items-start gap-2">
-                  <Check className="w-3 h-3 text-success mt-0.5 flex-shrink-0" />
+                  <Check className="w-3 h-3 text-success mt-0.5 shrink-0" />
                   <span className="font-mono text-xs text-gray-400 leading-relaxed">
                     {point}
                   </span>
