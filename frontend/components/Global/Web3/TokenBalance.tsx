@@ -1,8 +1,8 @@
 "use client";
-import { Coins, Wallet } from "lucide-react";
+import { Wallet } from "lucide-react";
 
 import { useCurrentAccount, useSuiClientQuery } from "@mysten/dapp-kit";
-import { formatSUI, CAPY_TOKEN } from "@/lib/sui";
+import { formatSUI } from "@/lib/sui";
 import Badge from "@/components/Common/Badge";
 
 export function TokenBalance() {
@@ -19,9 +19,6 @@ export function TokenBalance() {
     }
   );
 
-  // Mock CAPY balance (in a real app, you'd query the actual CAPY token balance)
-  const mockCapyBalance = 1234.56;
-
   if (!account || !balance) return null;
 
   const suiBalance = formatSUI(BigInt(balance.totalBalance));
@@ -32,12 +29,6 @@ export function TokenBalance() {
       <Badge variant="chain" size="md">
         <Wallet className="w-3 h-3" />
         {suiBalance} SUI
-      </Badge>
-
-      {/* CAPY Balance */}
-      <Badge variant="price" size="md">
-        <Coins className="w-3 h-3" />
-        {mockCapyBalance.toFixed(2)} CAPY
       </Badge>
     </div>
   );

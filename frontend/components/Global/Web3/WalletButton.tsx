@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { ArrowRight, Check, ChevronDown, Coins, Copy, Database, Download, ExternalLink, LogOut, User, Wallet } from "lucide-react";
+import { ArrowRight, ChevronDown, Copy, Database, Download, ExternalLink, LogOut, User, Wallet } from "lucide-react";
 import {
   useCurrentAccount,
   useDisconnectWallet,
@@ -15,8 +15,6 @@ import { useToast } from "@/hooks/useToast";
 import Modal from "@/components/Common/Modal";
 import Button from "@/components/Common/Button";
 
-type Network = "mainnet" | "testnet" | "devnet" | "localnet";
-
 export function WalletButton() {
   const account = useCurrentAccount();
   const { mutate: disconnect } = useDisconnectWallet();
@@ -26,7 +24,6 @@ export function WalletButton() {
 
   const [showWalletModal, setShowWalletModal] = useState(false);
   const [showAccountMenu, setShowAccountMenu] = useState(false);
-  const [selectedNetwork, setSelectedNetwork] = useState<Network>("testnet");
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Get SUI balance
@@ -39,9 +36,6 @@ export function WalletButton() {
       enabled: !!account,
     }
   );
-
-  // Mock CAPY balance
-  const mockCapyBalance = 1234.56;
 
   // Close account menu when clicking outside
   useEffect(() => {
@@ -90,14 +84,6 @@ export function WalletButton() {
     }
   };
 
-  const networks: { value: Network; label: string; color: string }[] = [
-    { value: "mainnet", label: "Sui Mainnet", color: "text-success" },
-    { value: "testnet", label: "Sui Testnet", color: "text-pending" },
-    { value: "devnet", label: "Sui Devnet", color: "text-info" },
-    { value: "localnet", label: "Sui Localnet", color: "text-gray-400" },
-  ];
-
-  const currentNetworkObj = networks.find((n) => n.value === selectedNetwork);
   const suiBalance = balance ? formatSUI(BigInt(balance.totalBalance)) : "0.0000";
 
   // If not connected, show connect button
@@ -238,43 +224,6 @@ export function WalletButton() {
                   {suiBalance}
                 </span>
               </div>
-              <div className="flex items-center justify-between p-3 glass-input rounded-lg">
-                <div className="flex items-center gap-2">
-                  <Coins className="w-4 h-4 text-yuzu" />
-                  <span className="font-mono text-sm text-white">CAPY</span>
-                </div>
-                <span className="font-mono text-sm font-bold text-yuzu">
-                  {mockCapyBalance.toFixed(2)}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Network Switcher */}
-          <div className="p-4 border-b border-white/10">
-            <p className="font-mono text-xs text-gray-400 mb-3 uppercase tracking-wide">
-              Network
-            </p>
-            <div className="space-y-1">
-              {networks.map((network) => (
-                <button
-                  key={network.value}
-                  onClick={() => setSelectedNetwork(network.value)}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
-                    selectedNetwork === network.value
-                      ? "bg-yuzu/20 border border-yuzu/30"
-                      : "hover:bg-white/5"
-                  }`}
-                >
-                  <span className={`w-2 h-2 rounded-full ${network.color}`}></span>
-                  <span className="font-mono text-sm text-white flex-1 text-left">
-                    {network.label}
-                  </span>
-                  {selectedNetwork === network.value && (
-                    <Check className="w-4 h-4 text-yuzu" />
-                  )}
-                </button>
-              ))}
             </div>
           </div>
 
