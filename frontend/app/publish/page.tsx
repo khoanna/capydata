@@ -1,3 +1,5 @@
+"use client";
+
 import { BookOpen, FileText, MessageCircle } from "lucide-react";
 import PublishWizard from "@/components/Publish/PublishWizard";
 
