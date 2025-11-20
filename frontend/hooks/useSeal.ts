@@ -1,3 +1,5 @@
+"use client";
+
 import {PACKAGE_ID, SERVER_OBJECT_ID} from "@/lib/constants";
 import {
   useCurrentAccount,
