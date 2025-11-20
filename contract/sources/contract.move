@@ -1,9 +1,7 @@
-/*
-/// Module: contract
+/// Main contract module - re-exports for convenience
 module contract::contract;
-*/
 
-// For Move coding conventions, see
-// https://docs.sui.io/concepts/sui-move-concepts/conventions
-
-
+// Re-export modules for easier imports
+public use contract::allowlist;
+public use contract::marketplace;
+public use contract::utils;
