@@ -35,12 +35,10 @@ export async function encrypt(input: Uint8Array) {
       data: input,
       threshold: 2,
     });
-
   return encryptedBytes;
 }
 
 export async function decrypt(encryptedBytes: Uint8Array) {
-
   const sessionKey = await SessionKey.create({
     address: address,
     packageId: PACKAGE_ID,
@@ -84,6 +82,6 @@ export async function decrypt(encryptedBytes: Uint8Array) {
     sessionKey,
     txBytes,
   });
-
+  
   return decryptedBytes;
 }

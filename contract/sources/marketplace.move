@@ -11,6 +11,8 @@ module contract::marketplace {
 		blob_id: ID,
 		owner: address,
 		title: String,
+        filename: String,
+        filetype: String,
 		description: String,
 		tags: vector<String>,
 		price: u64,
@@ -26,12 +28,14 @@ module contract::marketplace {
         transfer::share_object(marketplace);
     }
 
-    entry fun list_dataset(blob_id: ID, title: String, description: String, tags: vector<String>, price: u64, release_date: u64, ctx: &mut TxContext) {
+    entry fun list_dataset(blob_id: ID, title: String, filename: String, filetype: String, description: String, tags: vector<String>, price: u64, release_date: u64, ctx: &mut TxContext) {
         let dataset = Dataset {
             id: object::new(ctx),
             blob_id,
             owner: ctx.sender(),
             title,
+            filename,
+            filetype,
             description,
             tags,
             price,

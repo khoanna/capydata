@@ -15,12 +15,12 @@ const suiClient = useSuiClient().$extend(
 const address = useCurrentAccount()?.address || "";
 const {mutateAsync: signAndExecuteTransaction} = useSignAndExecuteTransaction();
 
-export const uploadFileToWalrus = async (file: File) : Promise<string> => {
+export const uploadFileToWalrus = async (decryptedBytes: Uint8Array, fileName: string) : Promise<string> => {
   const flow = suiClient.walrus.writeFilesFlow({
     files: [
       WalrusFile.from({
-        contents: new Uint8Array(await file.arrayBuffer()),
-        identifier: file.name,
+        contents: decryptedBytes,
+        identifier: fileName,
       }),
     ],
   });
