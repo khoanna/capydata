@@ -2,7 +2,7 @@ module contract::marketplace {
     use std::string::String;
     use sui::event::emit;
     use sui::package::claim_and_keep;
-    
+    use sui::clock::Clock;
     #[error]
     const ENotOwner:vector<u8> = b"Not owner";
 
@@ -69,12 +69,23 @@ module contract::marketplace {
         transfer::share_object(marketplace);
     }
 
-    
+    // When calling this function, pass clock = '0x6'
     #[allow(lint(self_transfer))]
-    public fun list_dataset(blob_object_id: ID, title: String, description: String, tags: vector<String>, price: u64, release_date: u64, marketplace: &mut Marketplace, ctx: &mut TxContext) {
+    public fun list_dataset(
+        blob_object_id: ID, 
+        title: String, 
+        filename: String,
+        filetype: String,
+        description: String, 
+        tags: vector<String>, 
+        price: u64, 
+        marketplace: &mut Marketplace, 
+        clock:&Clock, 
+        ctx: &mut TxContext
+    ) {
         assert!(price > 0, ENonPositivePrice);
 
-        let mut dataset = Dataset {
+        let dataset = Dataset {
             id: object::new(ctx),
             blob_object_id,
             owner: ctx.sender(),
@@ -85,10 +96,10 @@ module contract::marketplace {
             tags,
             price,
             amount_sold: 0,
-            release_date,
+            release_date: clock.timestamp_ms(),
             on_listed: true
         };
-        assert!(!marketplace.on_sale.contains(&object::id(&dataset)),EDataListed);
+        assert!(!marketplace.on_sale.contains(&object::id(&dataset)),EDataObjectExisted);
         // marketplace.on_sale.push_back(object::uid_to_address(dataset.id));
         marketplace.on_sale.push_back(object::id(&dataset));
         let _id = object::id(&dataset);
@@ -99,7 +110,11 @@ module contract::marketplace {
     }
     
 
-    public fun delist_dataset(dataset: &mut Dataset, marketplace: &mut Marketplace, ctx: &TxContext) {
+    public fun delist_dataset(
+        dataset: &mut Dataset, 
+        marketplace: &mut Marketplace, 
+        ctx: &TxContext
+    ) {
         assert!(dataset.owner == ctx.sender(), ENotOwner);
         assert!(dataset.on_listed == true, EDatasetNotListed);
         let (_, index) = vector::index_of(&marketplace.on_sale, &object::id(dataset));
@@ -112,14 +127,22 @@ module contract::marketplace {
             dataset_id: _id
          })
     }
-    public fun relist(dataset: &mut Dataset, marketplace: &mut Marketplace, ctx: &TxContext){
+    public fun relist(
+        dataset: &mut Dataset, 
+        marketplace: &mut Marketplace, 
+        ctx: &TxContext
+    ){
         assert!(dataset.owner == ctx.sender(), ENotOwner);
         assert!(dataset.on_listed == false, EDataListed);
         dataset.on_listed = true;
         marketplace.on_sale.push_back(object::id(dataset));
     }
 
-    public fun update_marketplace_owner(marketplace: &mut Marketplace, new_owner: address, ctx: &mut TxContext){
+    public fun update_marketplace_owner(
+        marketplace: &mut Marketplace, 
+        new_owner: address, 
+        ctx: &mut TxContext
+    ){
         assert!(marketplace.owner == ctx.sender(), ENotOwner);
         assert!(marketplace.owner != new_owner, EAlreadyMarketplaceOwner);
         marketplace.owner = new_owner;
@@ -155,19 +178,35 @@ module contract::marketplace {
         marketplace.owner
     }
     // Setter functions
-    public fun set_title(dataset: &mut Dataset, new_title: String, ctx: &mut TxContext){
+    public fun set_title(
+        dataset: &mut Dataset, 
+        new_title: String, 
+        ctx: &mut TxContext
+    ){
         assert!(dataset.owner == ctx.sender(), ENotOwner);
         dataset.title = new_title;
     }
-    public fun set_description(dataset: &mut Dataset, new_description: String, ctx: &mut TxContext){
+    public fun set_description(
+        dataset: &mut Dataset, 
+        new_description: String, 
+        ctx: &mut TxContext
+    ){
         assert!(dataset.owner == ctx.sender(), ENotOwner);
         dataset.description = new_description;
     }
-    public fun set_tags(dataset: &mut Dataset, new_tags: vector<String>, ctx: &mut TxContext){
+    public fun set_tags(
+        dataset: &mut Dataset, 
+        new_tags: vector<String>, 
+        ctx: &mut TxContext
+    ){
         assert!(dataset.owner == ctx.sender(), ENotOwner);
         dataset.tags = new_tags;
     }
-    public fun set_price(dataset: &mut Dataset, new_price: u64, ctx: &mut TxContext){
+    public fun set_price(
+        dataset: &mut Dataset, 
+        new_price: u64, 
+        ctx: &mut TxContext
+    ){
         assert!(new_price > 0, ENonPositivePrice);
         assert!(dataset.owner == ctx.sender(), ENotOwner);
         dataset.price = new_price;
