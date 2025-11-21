@@ -10,6 +10,7 @@ interface AppContext {
   appLoading: boolean;
   userDatasets: string[] | undefined;
   fetchListings: () => Promise<void>;
+  fetchUserDatasets: () => Promise<void>;
 }
 
 const appContext = createContext<AppContext | undefined>(undefined);
@@ -54,7 +55,8 @@ export const AppContextProvider = ({children}: {children: React.ReactNode}) => {
     allListings,
     appLoading,
     userDatasets,
-    fetchListings
+    fetchListings,
+    fetchUserDatasets
   };
 
   return (

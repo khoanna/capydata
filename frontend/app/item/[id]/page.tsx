@@ -16,16 +16,13 @@ export default function ItemDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const { allListings, appLoading, userDatasets } = useAppContext();
+  const { allListings, appLoading, userDatasets, fetchUserDatasets } = useAppContext();
   const { buyDataset, loading } = useMarketplace();
   const currentAccount = useCurrentAccount();
   const { addToast } = useToast();
-  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
 
-  // Find the asset by ID from real data
   const asset = allListings?.find((item) => item.id.id === id);
 
-  // Show loading state while data is being fetched OR if allListings is not yet available
   if (appLoading || !allListings) {
     return (
       <main className="min-h-screen pt-28 pb-20 bg-void">
@@ -41,15 +38,12 @@ export default function ItemDetailPage({
     );
   }
 
-  // Only show not found if we have listings but asset is not in them
   if (!asset) {
     notFound();
   }
 
-  // Check if current user is the owner
   const isOwner = currentAccount?.address === asset.owner;
   
-  // Check if user has already purchased this dataset
   const hasPurchased = userDatasets?.includes(id) || false;
 
   const handlePurchase = async () => {
@@ -72,7 +66,7 @@ export default function ItemDetailPage({
       addToast("Processing purchase...", "info");
       await buyDataset(asset);
       addToast("Dataset purchased successfully!", "success");
-      setShowPurchaseModal(false);
+      await fetchUserDatasets();
     } catch (error) {
       console.error("Purchase error:", error);
       addToast(
@@ -85,7 +79,6 @@ export default function ItemDetailPage({
   return (
     <main className="min-h-screen pt-28 pb-20 bg-void">
       <div className="max-w-7xl mx-auto px-6">
-        {/* Breadcrumb */}
         <div className="mb-6 flex items-center gap-2 font-mono text-xs text-gray-400 reveal">
           <Link href="/" className="hover:text-yuzu transition-colors">
             Home
@@ -98,9 +91,7 @@ export default function ItemDetailPage({
           <span className="text-white">{asset.title}</span>
         </div>
 
-        {/* Main Content */}
         <div className="space-y-8">
-          {/* Asset Header */}
           <SimpleAssetHeader 
             asset={asset} 
             onPurchase={!isOwner && !hasPurchased ? handlePurchase : undefined}
@@ -109,7 +100,6 @@ export default function ItemDetailPage({
             hasPurchased={hasPurchased}
           />
 
-          {/* Description Section */}
           <div className="glass-card p-8 rounded-xl reveal delay-100">
             <h2 className="text-2xl font-sans font-bold text-white mb-4">
               About This Dataset
@@ -121,7 +111,6 @@ export default function ItemDetailPage({
             </div>
           </div>
 
-          {/* Stats Section */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 reveal delay-200">
             <div className="glass-card p-6 rounded-xl">
               <div className="flex items-center gap-3 mb-3">
@@ -181,7 +170,6 @@ export default function ItemDetailPage({
           </div>
         </div>
 
-        {/* Related Assets */}
         <div className="mt-16 reveal delay-400">
           <h2 className="text-3xl font-sans font-bold text-white mb-6 flex items-center gap-2">
             <Sparkles className="w-6 h-6 text-yuzu" />
