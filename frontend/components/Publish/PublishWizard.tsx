@@ -62,7 +62,7 @@ const PublishWizard = () => {
   const [formData, setFormData] = useState<PublishFormData>(INITIAL_FORM_DATA);
   const [isDeploying, setIsDeploying] = useState(false);
   const [txResult, setTxResult] = useState<{digest: string; effects?: any} | null>(null);
-  
+  const [isTagDropdownOpen, setIsTagDropdownOpen] = useState(false);
   const { uploadFile, loading, isReady } = useMarketplace();
   const { addToast } = useToast();
   const currentAccount = useCurrentAccount();
