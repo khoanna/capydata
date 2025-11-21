@@ -5,7 +5,7 @@ const WhyUs = () => {
   return (
     <section
       id="features"
-      className="py-24 bg-panel border-t border-white/5 relative">
+      className="py-24 border-t border-white/5 relative">
       <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1/2 h-full bg-linear-to-l from-hydro/5 to-transparent pointer-events-none"></div>
 
       <div className="max-w-7xl mx-auto px-6 relative z-10">

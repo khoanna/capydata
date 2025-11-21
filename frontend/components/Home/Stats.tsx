@@ -2,7 +2,7 @@ import React from 'react'
 
 const Stats = () => {
   return (
-    <section className="border-b border-white/5 bg-panel/50">
+    <section className="border-b border-white/5">
         <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 divide-x divide-white/5">
             <div className="p-8 text-center hover:bg-white/5 transition-colors group cursor-default">
                 <div className="font-mono text-xs text-gray-500 mb-2 group-hover:text-yuzu uppercase tracking-widest">Total Liquidity</div>

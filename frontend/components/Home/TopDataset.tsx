@@ -3,7 +3,7 @@ import { Globe2, ArrowUpRight, BarChart2, MessageSquare } from "lucide-react";
 
 const TopDataset = () => {
   return (
-    <section id="top" className="py-24 relative bg-void">
+    <section id="top" className="py-24 relative">
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex flex-col md:flex-row justify-between items-end mb-12 reveal gap-4">
           <div>
@@ -18,7 +18,7 @@ const TopDataset = () => {
             </p>
           </div>
 
-          <div className="flex gap-2 bg-panel border border-white/10 p-1 rounded-lg">
+          {/* <div className="flex gap-2 bg-panel border border-white/10 p-1 rounded-lg">
             <button className="px-4 py-2 bg-white/10 rounded text-xs font-mono font-bold hover:bg-white/20 transition-colors">
               TRENDING
             </button>
@@ -28,7 +28,7 @@ const TopDataset = () => {
             <button className="px-4 py-2 text-gray-500 rounded text-xs font-mono hover:text-white hover:bg-white/5 transition-colors">
               FREE
             </button>
-          </div>
+          </div> */}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 grid-rows-2 gap-6 h-auto md:h-[600px] reveal delay-100">

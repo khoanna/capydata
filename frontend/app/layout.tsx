@@ -9,7 +9,8 @@ import CustomAnimations from "@/components/CustomAnimation";
 import Footer from "@/components/Footer";
 import ToastProvider from "@/components/Global/Toast/ToastProvider";
 import SuiProvider from "@/components/Global/Web3/SuiProvider";
-import {AppContextProvider} from "@/context/AppContext";
+import WebGLBackground from "@/components/Background/WebGLBackground";
+import { AppContextProvider } from "@/context/AppContext";
 
 const space = Space_Grotesk({
   subsets: ["latin"],
@@ -38,6 +39,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
       <body
         className={`${space.variable} ${jet.variable} overflow-x-hidden selection:bg-yuzu selection:text-black`}>
         <SuiProvider>
+          <WebGLBackground />
           <ToastProvider>
             <AppContextProvider>
               <CustomAnimations />

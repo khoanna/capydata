@@ -266,7 +266,7 @@
 }
 
 body {
-  background-color: #0c0c0c;
+  background: transparent;
   color: #e5e5e5;
   cursor: default;
 }

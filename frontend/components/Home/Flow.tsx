@@ -3,7 +3,7 @@ import { FileUp, Container, Banknote } from "lucide-react";
 
 const Flow = () => {
   return (
-     <section id="flow" className="py-32 bg-void border-t border-white/5 relative overflow-hidden">
+     <section id="flow" className="py-32 border-t border-white/5 relative overflow-hidden">
         <div className="absolute inset-0 bg-[linear-linear(to_right,#80808012_1px,transparent_1px),linear-linear(to_bottom,#80808012_1px,transparent_1px)] bg-size[24px_24px] mask-image-gradient"></div>
         
         <div className="max-w-7xl mx-auto px-6 relative z-10">
