@@ -71,12 +71,12 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center font-mono text-[10px] text-gray-600">
-          <div>© 2024 CapyData Inc.</div>
+          <div>© 2025 CapyData Inc.</div>
           <div className="flex gap-4 mt-4 md:mt-0">
-            <span className="flex items-center gap-1">
+            {/* <span className="flex items-center gap-1">
               <span className="w-2 h-2 rounded-full bg-green-500"></span>{" "}
               SYSTEM: OPERATIONAL
-            </span>
+            </span> */}
           </div>
         </div>
       </div>

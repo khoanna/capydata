@@ -3,6 +3,7 @@ import { Check, Coins, DollarSign, Gift, Info, Sparkles, Tag, TrendingUp } from 
 
 import { PublishFormData } from "./PublishWizard";
 import { Input } from "@/components/Common/Input";
+import CustomSelect from "@/components/Common/CustomSelect";
 import { capyToUSD, formatUSD } from "@/lib/utils";
 
 interface PricingStepProps {
@@ -26,6 +27,24 @@ const PricingStep = ({ formData, updateFormData }: PricingStepProps) => {
       description: "Set a one-time purchase price",
       details: "Buyers pay a fixed amount of CAPY tokens for permanent access.",
     },
+    // {
+    //   value: "dynamic" as const,
+    //   icon: <TrendingUp className="w-6 h-6" />,
+    //   label: "Dynamic (AMM)",
+    //   description: "Automated Market Maker bonding curve",
+    //   details: "Price adjusts automatically based on supply and demand. Early buyers get lower prices.",
+    // },
+  ];
+
+  const licenses = [
+    { value: "CC0", label: "CC0 - Public Domain" },
+    { value: "CC-BY", label: "CC BY - Attribution Required" },
+    { value: "CC-BY-SA", label: "CC BY-SA - Attribution + ShareAlike" },
+    { value: "CC-BY-NC", label: "CC BY-NC - Non-Commercial" },
+    { value: "MIT", label: "MIT License" },
+    { value: "Apache-2.0", label: "Apache License 2.0" },
+    { value: "GPL-3.0", label: "GPL 3.0" },
+    { value: "Custom", label: "Custom License" },
   ];
 
   const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -49,7 +68,7 @@ const PricingStep = ({ formData, updateFormData }: PricingStepProps) => {
         <label className="block font-mono text-xs text-gray-400 mb-3 tracking-wide">
           Pricing Model *
         </label>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
           {pricingModels.map((model) => (
             <button
               key={model.value}
@@ -164,6 +183,33 @@ const PricingStep = ({ formData, updateFormData }: PricingStepProps) => {
           </ul>
         </div>
       )}
+
+      {/* License Selection */}
+      <CustomSelect
+        label="License *"
+        value={formData.license}
+        onChange={(value) => updateFormData({ license: value })}
+        options={licenses}
+        hint="Specify how others can use your dataset"
+        icon={<FileText className="w-4 h-4" />}
+      />
+
+      {/* License Info */}
+      <div className="p-4 glass-input rounded-lg">
+        <div className="flex items-start gap-3">
+          <FileText className="w-5 h-5 text-gray-400 mt-0.5" />
+          <div>
+            <p className="font-mono text-sm text-white mb-2">
+              About Licenses
+            </p>
+            <p className="font-mono text-xs text-gray-400 leading-relaxed">
+              Choose a license that matches your goals. Creative Commons licenses are ideal
+              for datasets. Open source licenses (MIT, Apache, GPL) work well for algorithms.
+              Custom licenses allow you to define specific terms.
+            </p>
+          </div>
+        </div>
+      </div>
 
       {/* Revenue Projection (for paid models) */}
       {formData.pricingModel !== "free" && formData.price > 0 && (
