@@ -40,15 +40,15 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
         className={`${space.variable} ${jet.variable} overflow-x-hidden selection:bg-yuzu selection:text-black`}>
         <SuiProvider>
           <WebGLBackground />
-          <ToastProvider>
-            <AppContextProvider>
+          <div className="relative" style={{ zIndex: 1 }}>
+            <ToastProvider>
               <CustomAnimations />
               <Navbar />
               {children}
               <Footer />
               <FooterSlide />
-            </AppContextProvider>
-          </ToastProvider>
+            </ToastProvider>
+          </div>
         </SuiProvider>
       </body>
     </html>

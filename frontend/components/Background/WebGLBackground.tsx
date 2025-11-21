@@ -24,6 +24,8 @@ export default function WebGLBackground() {
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const mouseRef = useRef({ x: 0, y: 0, targetX: 0, targetY: 0 });
+  const scrollRef = useRef({ current: 0, target: 0 });
+  const hoveredPlanetRef = useRef<THREE.Mesh | null>(null);
   const starsRef = useRef<THREE.Points | null>(null);
   const planetsRef = useRef<Planet[]>([]);
   const asteroidsRef = useRef<Asteroid[]>([]);
@@ -59,6 +61,7 @@ export default function WebGLBackground() {
     });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.domElement.style.pointerEvents = 'auto';
     containerRef.current.appendChild(renderer.domElement);
     rendererRef.current = renderer;
 
@@ -336,11 +339,52 @@ export default function WebGLBackground() {
     });
 
     // ============================================
-    // MOUSE TRACKING
+    // SCROLL TRACKING
+    // ============================================
+    const handleScroll = () => {
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      const scrollPercentage = window.scrollY / Math.max(maxScroll, 1);
+      scrollRef.current.target = scrollPercentage;
+    };
+
+    // ============================================
+    // MOUSE TRACKING & HOVER
     // ============================================
     const handleMouseMove = (event: MouseEvent) => {
       mouseRef.current.targetX = (event.clientX / window.innerWidth) * 2 - 1;
       mouseRef.current.targetY = -(event.clientY / window.innerHeight) * 2 + 1;
+
+      // Hover detection for planets
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2(
+        mouseRef.current.targetX,
+        mouseRef.current.targetY
+      );
+      raycaster.setFromCamera(mouse, camera);
+
+      const planetMeshes = planetsRef.current.map((p) => p.mesh);
+      const intersects = raycaster.intersectObjects(planetMeshes);
+
+      // Reset previous hovered planet
+      if (hoveredPlanetRef.current) {
+        const material = hoveredPlanetRef.current.material as THREE.MeshPhongMaterial;
+        material.emissiveIntensity = 0.3;
+        hoveredPlanetRef.current = null;
+        if (containerRef.current) {
+          containerRef.current.style.cursor = 'default';
+        }
+      }
+
+      // Highlight new hovered planet
+      if (intersects.length > 0) {
+        const planet = intersects[0].object as THREE.Mesh;
+        const material = planet.material as THREE.MeshPhongMaterial;
+        material.emissiveIntensity = 0.6;
+        hoveredPlanetRef.current = planet;
+        if (containerRef.current) {
+          containerRef.current.style.cursor = 'pointer';
+        }
+      }
     };
 
     // ============================================
@@ -498,6 +542,10 @@ export default function WebGLBackground() {
 
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("click", handleClick);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    // Initial scroll position
+    handleScroll();
 
     // ============================================
     // WINDOW RESIZE
@@ -524,6 +572,9 @@ export default function WebGLBackground() {
       mouseRef.current.x += (mouseRef.current.targetX - mouseRef.current.x) * 0.05;
       mouseRef.current.y += (mouseRef.current.targetY - mouseRef.current.y) * 0.05;
 
+      // Smooth scroll interpolation
+      scrollRef.current.current += (scrollRef.current.target - scrollRef.current.current) * 0.05;
+
       // Camera parallax
       camera.position.x = mouseRef.current.x * 80;
       camera.position.y = mouseRef.current.y * 80;
@@ -546,18 +597,28 @@ export default function WebGLBackground() {
         starGeometry.attributes.size.needsUpdate = true;
       }
 
-      // Animate planets
-      planetsRef.current.forEach((planet) => {
-        // Rotate on axis
-        planet.mesh.rotation.y += planet.rotationSpeed;
-        planet.mesh.rotation.x += planet.rotationSpeed * 0.1;
+      // Animate planets with scroll influence
+      const scrollInfluence = scrollRef.current.current;
 
-        // Orbital motion
-        planet.angle += planet.orbitSpeed;
+      planetsRef.current.forEach((planet, index) => {
+        // Rotate on axis - speed increases with scroll
+        const scrollSpeedMultiplier = 1 + scrollInfluence * 2;
+        planet.mesh.rotation.y += planet.rotationSpeed * scrollSpeedMultiplier;
+        planet.mesh.rotation.x += planet.rotationSpeed * 0.1 * scrollSpeedMultiplier;
+
+        // Orbital motion - accelerated by scroll
+        planet.angle += planet.orbitSpeed * scrollSpeedMultiplier;
         const baseX = planet.mesh.position.x;
         const baseZ = planet.mesh.position.z;
         planet.mesh.position.x += Math.cos(planet.angle) * 0.2;
         planet.mesh.position.z += Math.sin(planet.angle) * 0.2;
+
+        // Additional scroll-based motion - planets drift based on scroll
+        const scrollOffset = scrollInfluence * Math.PI * 2;
+        const driftX = Math.sin(scrollOffset + index * 0.5) * 50;
+        const driftY = Math.cos(scrollOffset + index * 0.7) * 30;
+        planet.mesh.position.x += driftX * 0.01;
+        planet.mesh.position.y += driftY * 0.01;
 
         // Animate moons
         if (planet.moons && planet.moons.length > 0) {
@@ -595,6 +656,7 @@ export default function WebGLBackground() {
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("click", handleClick);
+      window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", handleResize);
 
       if (animationFrameRef.current) {
@@ -630,7 +692,8 @@ export default function WebGLBackground() {
       ref={containerRef}
       className="fixed top-0 left-0 w-full h-full"
       style={{
-        zIndex: -10,
+        zIndex: 0,
+        pointerEvents: 'none',
         background: "radial-gradient(ellipse at center, #0f0f18 0%, #050508 50%, #000000 100%)",
       }}
     />
