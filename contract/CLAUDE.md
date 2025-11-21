@@ -1,0 +1,1 @@
+- In the 6. MEDIUM: seal_approve Has Unused, the seal_approve function is called when we decrypt the data. From now, you can take this function to identify if the user can get access to the data (has the necessary NFT).
