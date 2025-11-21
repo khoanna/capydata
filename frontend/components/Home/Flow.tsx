@@ -50,7 +50,7 @@ const Flow = () => {
                         <Banknote className="w-10 h-10 text-gray-400 group-hover:text-grass transition-colors" />
                         <div className="absolute -top-3 -right-3 w-8 h-8 bg-panel border border-white/10 rounded flex items-center justify-center font-mono text-xs text-grass font-bold">03</div>
                     </div>
-                    <h3 className="text-2xl font-sans font-bold text-white mb-3 group-hover:text-grass transition-colors">Liquidate</h3>
+                    <h3 className="text-2xl font-sans font-bold text-white mb-3 group-hover:text-grass transition-colors">Earn</h3>
                     <p className="font-mono text-xs text-gray-400 leading-relaxed pr-8">
                         Get paid in CAPY instantly when users decrypt your blobs.
                     </p>

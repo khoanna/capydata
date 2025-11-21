@@ -249,21 +249,29 @@ const PublishWizard = () => {
 
       {/* Main Interface Card */}
       <div className="relative">
-        {/* Decorative Corners */}
-        <div className="absolute -top-1 -left-1 w-4 h-4 border-t-2 border-l-2 border-yuzu/50"></div>
-        <div className="absolute -top-1 -right-1 w-4 h-4 border-t-2 border-r-2 border-yuzu/50"></div>
-        <div className="absolute -bottom-1 -left-1 w-4 h-4 border-b-2 border-l-2 border-yuzu/50"></div>
-        <div className="absolute -bottom-1 -right-1 w-4 h-4 border-b-2 border-r-2 border-yuzu/50"></div>
+        {/* Decorative Corners - Animate with card */}
+        <div className="absolute -top-1 -left-1 w-4 h-4 border-t-2 border-l-2 border-yuzu/50 transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)]"></div>
+        <div className="absolute -top-1 -right-1 w-4 h-4 border-t-2 border-r-2 border-yuzu/50 transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)]"></div>
+        <div className="absolute -bottom-1 -left-1 w-4 h-4 border-b-2 border-l-2 border-yuzu/50 transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)]"></div>
+        <div className="absolute -bottom-1 -right-1 w-4 h-4 border-b-2 border-r-2 border-yuzu/50 transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)]"></div>
 
-        <div className="glass-card border border-white/10 bg-panel/50 backdrop-blur-xl p-8 md:p-12 min-h-[500px] relative overflow-hidden">
-          
+        <div
+          className={`glass-card border border-white/10 bg-panel/50 backdrop-blur-xl p-8 md:p-12 relative overflow-visible
+            transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)]
+            ${currentStep === 1 && isTagDropdownOpen ? 'min-h-[800px]' : 'min-h-[500px]'}`}
+        >
+
           {/* Background Grid Texture */}
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-size-[24px_24px] pointer-events-none"></div>
 
           {/* Step Content */}
           <div className="relative z-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {currentStep === 1 && (
-              <MetadataStep formData={formData} updateFormData={updateFormData} />
+              <MetadataStep
+                formData={formData}
+                updateFormData={updateFormData}
+                onTagDropdownOpenChange={setIsTagDropdownOpen}
+              />
             )}
             {currentStep === 2 && (
               <AssetLocationStep formData={formData} updateFormData={updateFormData} />
