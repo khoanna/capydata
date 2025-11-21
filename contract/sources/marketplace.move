@@ -70,7 +70,7 @@ module contract::marketplace {
     // When calling this function, pass clock = '0x6'
     #[allow(lint(self_transfer))]
     public fun list_dataset(
-        blob_object_id: ID, 
+        blob_id: String, 
         title: String, 
         filename: String,
         filetype: String,
@@ -81,7 +81,7 @@ module contract::marketplace {
         clock:&Clock, 
         ctx: &mut TxContext
     ) {
-        assert!(price > 0, ENonPositivePrice);
+        assert!(price >= 0, ENegativePrice);
 
         let dataset = Dataset {
             id: object::new(ctx),
@@ -205,7 +205,7 @@ module contract::marketplace {
         new_price: u64, 
         ctx: &mut TxContext
     ){
-        assert!(new_price > 0, ENonPositivePrice);
+        assert!(new_price >= 0, ENegativePrice);
         assert!(dataset.owner == ctx.sender(), ENotOwner);
         dataset.price = new_price;
     }
