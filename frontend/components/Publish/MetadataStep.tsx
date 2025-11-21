@@ -1,8 +1,10 @@
 import { PublishFormData } from "./PublishWizard";
 import { Input, TextArea } from "@/components/Common/Input";
 import TagDropdown from "@/components/Common/TagDropdown";
+import { AVAILABLE_TAGS } from "@/lib/constants";
+
 import { Heading } from "lucide-react";
-import { getAllTags } from "@/lib/mockData";
+
 
 interface MetadataStepProps {
   formData: PublishFormData;
@@ -12,7 +14,6 @@ interface MetadataStepProps {
 
 const MetadataStep = ({ formData, updateFormData, onTagDropdownOpenChange }: MetadataStepProps) => {
   // Get all available tags from marketplace
-  const availableTags = getAllTags();
 
   return (
     <div className="space-y-6">
@@ -47,7 +48,7 @@ const MetadataStep = ({ formData, updateFormData, onTagDropdownOpenChange }: Met
       <TagDropdown
         selectedTags={formData.tags}
         onTagsChange={(tags) => updateFormData({ tags })}
-        availableTags={availableTags}
+        availableTags={AVAILABLE_TAGS}
         label="Tags *"
         hint="Select from marketplace tags or create custom ones"
         placeholder="Search or add tags..."
