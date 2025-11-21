@@ -185,17 +185,17 @@ const PricingStep = ({ formData, updateFormData }: PricingStepProps) => {
       )}
 
       {/* License Selection */}
-      <CustomSelect
+      {/* <CustomSelect
         label="License *"
         value={formData.license}
         onChange={(value) => updateFormData({ license: value })}
         options={licenses}
         hint="Specify how others can use your dataset"
         icon={<FileText className="w-4 h-4" />}
-      />
+      /> */}
 
       {/* License Info */}
-      <div className="p-4 glass-input rounded-lg">
+      {/* <div className="p-4 glass-input rounded-lg">
         <div className="flex items-start gap-3">
           <FileText className="w-5 h-5 text-gray-400 mt-0.5" />
           <div>
@@ -209,7 +209,7 @@ const PricingStep = ({ formData, updateFormData }: PricingStepProps) => {
             </p>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Revenue Projection (for paid models) */}
       {formData.pricingModel !== "free" && formData.price > 0 && (
