@@ -1,7 +1,18 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import * as THREE from "three";
+import PlanetMetadataOverlay from "./PlanetMetadataOverlay";
+
+interface DatasetMetadata {
+  name: string;
+  category: string;
+  size: string;
+  price: string;
+  downloads: number;
+  quality: string;
+}
 
 interface Planet {
   mesh: THREE.Mesh;
@@ -10,6 +21,7 @@ interface Planet {
   rotationSpeed: number;
   angle: number;
   moons?: THREE.Mesh[];
+  dataset: DatasetMetadata;
 }
 
 interface Asteroid {
@@ -18,7 +30,16 @@ interface Asteroid {
   rotationSpeed: THREE.Vector3;
 }
 
+interface Spacecraft {
+  mesh: THREE.Mesh;
+  velocity: THREE.Vector3;
+  rotationSpeed: THREE.Vector3;
+}
+
 export default function WebGLBackground() {
+  const pathname = usePathname();
+  const isHomePage = pathname === "/";
+
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
@@ -29,7 +50,21 @@ export default function WebGLBackground() {
   const starsRef = useRef<THREE.Points | null>(null);
   const planetsRef = useRef<Planet[]>([]);
   const asteroidsRef = useRef<Asteroid[]>([]);
+  const spacecraftRef = useRef<Spacecraft[]>([]);
   const animationFrameRef = useRef<number | undefined>(undefined);
+  const selectedPlanetMeshRef = useRef<THREE.Mesh | null>(null);
+  const selectedPlanetDataRef = useRef<{
+    dataset: DatasetMetadata;
+    screenPos: { x: number; y: number };
+    scale: number;
+  } | null>(null);
+
+  // State for selected planet metadata overlay
+  const [selectedPlanet, setSelectedPlanet] = useState<{
+    dataset: DatasetMetadata;
+    screenPos: { x: number; y: number };
+    scale: number;
+  } | null>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -148,7 +183,6 @@ export default function WebGLBackground() {
     // ============================================
     const createPlanets = () => {
       const planetData = [
-        // Large gas giant in the distance
         {
           size: 350,
           color: 0x8b7355,
@@ -158,8 +192,15 @@ export default function WebGLBackground() {
           z: -500,
           speed: 0.0001,
           hasRing: true,
+          dataset: {
+            name: "Climate Archive 2050",
+            category: "Climate & Weather",
+            size: "2.4 TB",
+            price: "150 SUI",
+            downloads: 12847,
+            quality: "Premium"
+          }
         },
-        // Blue-gray rocky planet (closer)
         {
           size: 250,
           color: 0x4a6580,
@@ -169,8 +210,15 @@ export default function WebGLBackground() {
           z: -300,
           speed: 0.00015,
           hasMoon: true,
+          dataset: {
+            name: "Global IoT Telemetry",
+            category: "IoT & Sensors",
+            size: "890 GB",
+            price: "85 SUI",
+            downloads: 8234,
+            quality: "Verified"
+          }
         },
-        // Capy-brown desert planet (very close)
         {
           size: 200,
           color: 0xc69c6d,
@@ -179,8 +227,15 @@ export default function WebGLBackground() {
           y: -150,
           z: -150,
           speed: 0.0002,
+          dataset: {
+            name: "DeFi Transaction Logs",
+            category: "Finance & DeFi",
+            size: "1.2 TB",
+            price: "200 SUI",
+            downloads: 15992,
+            quality: "Premium"
+          }
         },
-        // Icy planet (distant)
         {
           size: 280,
           color: 0x6b9faf,
@@ -190,8 +245,15 @@ export default function WebGLBackground() {
           z: -600,
           speed: 0.00008,
           hasRing: true,
+          dataset: {
+            name: "Healthcare AI Training",
+            category: "Healthcare & Medical",
+            size: "3.7 TB",
+            price: "320 SUI",
+            downloads: 6841,
+            quality: "Premium"
+          }
         },
-        // Small reddish rocky planet (very close)
         {
           size: 150,
           color: 0x9b6b5e,
@@ -200,8 +262,15 @@ export default function WebGLBackground() {
           y: 150,
           z: -100,
           speed: 0.00025,
+          dataset: {
+            name: "Real-time Market Data",
+            category: "Finance & Trading",
+            size: "450 GB",
+            price: "95 SUI",
+            downloads: 21443,
+            quality: "Live Feed"
+          }
         },
-        // Purple gas giant
         {
           size: 320,
           color: 0x7a6b9f,
@@ -211,6 +280,14 @@ export default function WebGLBackground() {
           z: -550,
           speed: 0.00012,
           hasMoon: true,
+          dataset: {
+            name: "Neural Network Corpus",
+            category: "AI & Machine Learning",
+            size: "5.1 TB",
+            price: "480 SUI",
+            downloads: 9367,
+            quality: "Premium"
+          }
         },
       ];
 
@@ -241,6 +318,7 @@ export default function WebGLBackground() {
           rotationSpeed: 0.0008 + Math.random() * 0.0012,
           angle: Math.atan2(data.z, data.x),
           moons: [],
+          dataset: data.dataset,
         };
 
         // Add ring if specified
@@ -327,15 +405,103 @@ export default function WebGLBackground() {
       }
     };
 
+    // ============================================
+    // SPACECRAFT CREATION
+    // ============================================
+    const createSpacecraft = () => {
+      const spacecraftCount = Math.floor(8 * particleMultiplier);
+
+      for (let i = 0; i < spacecraftCount; i++) {
+        // Create futuristic spacecraft geometry
+        const geometry = new THREE.Group();
+
+        // Main body (elongated octahedron)
+        const bodyGeometry = new THREE.OctahedronGeometry(15, 0);
+        const bodyMaterial = new THREE.MeshPhongMaterial({
+          color: i % 3 === 0 ? 0x4ECDC4 : i % 3 === 1 ? 0xFF9F1C : 0x95D600,
+          emissive: i % 3 === 0 ? 0x2a6d68 : i % 3 === 1 ? 0x8a5010 : 0x4a6b00,
+          emissiveIntensity: 0.5,
+          shininess: 100,
+        });
+        const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+        body.scale.set(1, 0.5, 2);
+        geometry.add(body);
+
+        // Wings (two flat triangular prisms)
+        const wingGeometry = new THREE.ConeGeometry(8, 20, 3);
+        const wingMaterial = new THREE.MeshPhongMaterial({
+          color: 0x555555,
+          emissive: 0x222222,
+          emissiveIntensity: 0.3,
+        });
+
+        const leftWing = new THREE.Mesh(wingGeometry, wingMaterial);
+        leftWing.rotation.z = Math.PI / 2;
+        leftWing.position.set(-12, 0, 5);
+        geometry.add(leftWing);
+
+        const rightWing = new THREE.Mesh(wingGeometry, wingMaterial);
+        rightWing.rotation.z = -Math.PI / 2;
+        rightWing.position.set(12, 0, 5);
+        geometry.add(rightWing);
+
+        // Engine glow (small sphere at back)
+        const engineGeometry = new THREE.SphereGeometry(4, 8, 8);
+        const engineMaterial = new THREE.MeshBasicMaterial({
+          color: 0x00ffff,
+          transparent: true,
+          opacity: 0.8,
+        });
+        const engine = new THREE.Mesh(engineGeometry, engineMaterial);
+        engine.position.set(0, 0, -25);
+        geometry.add(engine);
+
+        // Random starting position across the scene
+        const spacecraft = new THREE.Object3D();
+        spacecraft.add(geometry);
+
+        spacecraft.position.x = (Math.random() - 0.5) * 1500;
+        spacecraft.position.y = (Math.random() - 0.5) * 800;
+        spacecraft.position.z = (Math.random() - 0.5) * 1500;
+
+        // Random velocity direction
+        const speed = 2 + Math.random() * 3;
+        const direction = new THREE.Vector3(
+          (Math.random() - 0.5),
+          (Math.random() - 0.5) * 0.3,
+          (Math.random() - 0.5)
+        ).normalize();
+
+        const velocity = direction.multiplyScalar(speed);
+
+        // Random rotation speed
+        const rotationSpeed = new THREE.Vector3(
+          (Math.random() - 0.5) * 0.01,
+          (Math.random() - 0.5) * 0.01,
+          (Math.random() - 0.5) * 0.01
+        );
+
+        scene.add(spacecraft);
+
+        spacecraftRef.current.push({
+          mesh: spacecraft as THREE.Mesh,
+          velocity,
+          rotationSpeed,
+        });
+      }
+    };
+
     // Initialize scene
     createStarField();
     createPlanets();
     createAsteroids();
+    createSpacecraft();
 
     console.log("WebGL Background initialized:", {
       stars: starsRef.current ? "✓" : "✗",
       planets: planetsRef.current.length,
       asteroids: asteroidsRef.current.length,
+      spacecraft: spacecraftRef.current.length,
     });
 
     // ============================================
@@ -388,7 +554,7 @@ export default function WebGLBackground() {
     };
 
     // ============================================
-    // CLICK INTERACTIONS
+    // CLICK TO SELECT PLANET
     // ============================================
     const handleClick = (event: MouseEvent) => {
       const raycaster = new THREE.Raycaster();
@@ -399,153 +565,128 @@ export default function WebGLBackground() {
 
       raycaster.setFromCamera(mouse, camera);
 
-      // Check if we clicked on a planet
+      // Check if clicked on a planet
       const planetMeshes = planetsRef.current.map((p) => p.mesh);
       const intersects = raycaster.intersectObjects(planetMeshes);
 
       if (intersects.length > 0) {
-        // Planet clicked - create explosion effect
-        const planet = intersects[0].object as THREE.Mesh;
-        const particleCount = 100;
-        const particles = new THREE.BufferGeometry();
-        const positions = new Float32Array(particleCount * 3);
-        const velocities: THREE.Vector3[] = [];
+        const clickedMesh = intersects[0].object as THREE.Mesh;
+        const clickedPlanet = planetsRef.current.find((p) => p.mesh === clickedMesh);
 
-        for (let i = 0; i < particleCount; i++) {
-          const i3 = i * 3;
-          positions[i3] = planet.position.x;
-          positions[i3 + 1] = planet.position.y;
-          positions[i3 + 2] = planet.position.z;
+        if (clickedPlanet) {
+          // Calculate 2D screen position from 3D world position
+          const vector = new THREE.Vector3();
+          clickedMesh.getWorldPosition(vector);
+          vector.project(camera);
 
-          velocities.push(
-            new THREE.Vector3(
-              (Math.random() - 0.5) * 5,
-              (Math.random() - 0.5) * 5,
-              (Math.random() - 0.5) * 5
-            )
-          );
+          const screenX = (vector.x * 0.5 + 0.5) * window.innerWidth;
+          const screenY = (-(vector.y * 0.5) + 0.5) * window.innerHeight;
+
+          // Calculate scale based on distance from camera
+          const distance = camera.position.distanceTo(clickedMesh.position);
+          const scale = Math.max(0.4, Math.min(1, 1000 / distance));
+
+          selectedPlanetMeshRef.current = clickedMesh;
+          selectedPlanetDataRef.current = {
+            dataset: clickedPlanet.dataset,
+            screenPos: { x: screenX, y: screenY },
+            scale,
+          };
+          setSelectedPlanet({
+            dataset: clickedPlanet.dataset,
+            screenPos: { x: screenX, y: screenY },
+            scale,
+          });
         }
-
-        particles.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-
-        const particleMaterial = new THREE.PointsMaterial({
-          color: 0xffffff,
-          size: 4,
-          transparent: true,
-          opacity: 1,
-          blending: THREE.AdditiveBlending,
-        });
-
-        const particleSystem = new THREE.Points(particles, particleMaterial);
-        scene.add(particleSystem);
-
-        let life = 0;
-        const animateExplosion = () => {
-          life += 0.02;
-          const pos = particles.attributes.position.array as Float32Array;
-
-          for (let i = 0; i < particleCount; i++) {
-            const i3 = i * 3;
-            pos[i3] += velocities[i].x;
-            pos[i3 + 1] += velocities[i].y;
-            pos[i3 + 2] += velocities[i].z;
-          }
-
-          particles.attributes.position.needsUpdate = true;
-          particleMaterial.opacity = Math.max(0, 1 - life);
-
-          if (life < 1) {
-            requestAnimationFrame(animateExplosion);
-          } else {
-            scene.remove(particleSystem);
-            particles.dispose();
-            particleMaterial.dispose();
-          }
-        };
-
-        animateExplosion();
       } else {
-        // Empty space click - create ripple
-        const { clientX, clientY } = event;
-        const rippleCount = 30;
-        const ripplePositions = new Float32Array(rippleCount * 3);
-        const rippleVelocities = new Float32Array(rippleCount * 3);
-
-        const centerX = (clientX / window.innerWidth) * 2 - 1;
-        const centerY = -(clientY / window.innerHeight) * 2 + 1;
-
-        const vector = new THREE.Vector3(centerX, centerY, 0.5);
-        vector.unproject(camera);
-        const dir = vector.sub(camera.position).normalize();
-        const distance = -camera.position.z / dir.z;
-        const pos = camera.position.clone().add(dir.multiplyScalar(distance));
-
-        for (let i = 0; i < rippleCount; i++) {
-          const i3 = i * 3;
-          const angle = (i / rippleCount) * Math.PI * 2;
-          const speed = 2 + Math.random() * 3;
-
-          ripplePositions[i3] = pos.x;
-          ripplePositions[i3 + 1] = pos.y;
-          ripplePositions[i3 + 2] = pos.z;
-
-          rippleVelocities[i3] = Math.cos(angle) * speed;
-          rippleVelocities[i3 + 1] = Math.sin(angle) * speed;
-          rippleVelocities[i3 + 2] = (Math.random() - 0.5) * speed;
-        }
-
-        const geometry = new THREE.BufferGeometry();
-        geometry.setAttribute("position", new THREE.BufferAttribute(ripplePositions, 3));
-
-        const material = new THREE.PointsMaterial({
-          size: 4,
-          color: 0xccddff,
-          transparent: true,
-          opacity: 1,
-          blending: THREE.AdditiveBlending,
-        });
-
-        const ripple = new THREE.Points(geometry, material);
-        scene.add(ripple);
-
-        let rippleLife = 0;
-        const animateRipple = () => {
-          rippleLife += 0.025;
-
-          const positions = geometry.attributes.position.array as Float32Array;
-          for (let i = 0; i < rippleCount; i++) {
-            const i3 = i * 3;
-            positions[i3] += rippleVelocities[i3];
-            positions[i3 + 1] += rippleVelocities[i3 + 1];
-            positions[i3 + 2] += rippleVelocities[i3 + 2];
-
-            rippleVelocities[i3] *= 0.96;
-            rippleVelocities[i3 + 1] *= 0.96;
-            rippleVelocities[i3 + 2] *= 0.96;
-          }
-
-          geometry.attributes.position.needsUpdate = true;
-          material.opacity = Math.max(0, 1 - rippleLife);
-
-          if (rippleLife < 1) {
-            requestAnimationFrame(animateRipple);
-          } else {
-            scene.remove(ripple);
-            geometry.dispose();
-            material.dispose();
-          }
-        };
-
-        animateRipple();
+        // Clicked empty space - close overlay
+        selectedPlanetMeshRef.current = null;
+        selectedPlanetDataRef.current = null;
+        setSelectedPlanet(null);
       }
     };
 
     window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("click", handleClick);
     window.addEventListener("scroll", handleScroll, { passive: true });
+
+    // Only enable planet click interactions on home page
+    if (isHomePage) {
+      window.addEventListener("click", handleClick);
+    }
 
     // Initial scroll position
     handleScroll();
+
+    // ============================================
+    // EXPLOSION EFFECT
+    // ============================================
+    const createExplosion = (position: THREE.Vector3) => {
+      const particleCount = 30;
+      const particles: Array<{
+        mesh: THREE.Mesh;
+        velocity: THREE.Vector3;
+        life: number;
+        maxLife: number;
+      }> = [];
+
+      for (let i = 0; i < particleCount; i++) {
+        const geometry = new THREE.SphereGeometry(2 + Math.random() * 3, 8, 8);
+        const material = new THREE.MeshBasicMaterial({
+          color: i % 3 === 0 ? 0xFF9F1C : i % 3 === 1 ? 0x00ffff : 0xFFFFFF,
+          transparent: true,
+          opacity: 1,
+        });
+        const particle = new THREE.Mesh(geometry, material);
+        particle.position.copy(position);
+
+        // Random explosion direction
+        const velocity = new THREE.Vector3(
+          (Math.random() - 0.5) * 8,
+          (Math.random() - 0.5) * 8,
+          (Math.random() - 0.5) * 8
+        );
+
+        scene.add(particle);
+
+        particles.push({
+          mesh: particle,
+          velocity,
+          life: 0,
+          maxLife: 30 + Math.random() * 20,
+        });
+      }
+
+      // Animate explosion particles
+      const animateExplosion = () => {
+        let activeParticles = 0;
+
+        particles.forEach((p) => {
+          if (p.life < p.maxLife) {
+            p.mesh.position.add(p.velocity);
+            p.velocity.multiplyScalar(0.95); // Deceleration
+            p.life++;
+
+            // Fade out
+            const material = p.mesh.material as THREE.MeshBasicMaterial;
+            material.opacity = 1 - p.life / p.maxLife;
+
+            activeParticles++;
+          } else if (p.mesh.parent) {
+            // Remove particle
+            scene.remove(p.mesh);
+            p.mesh.geometry.dispose();
+            (p.mesh.material as THREE.Material).dispose();
+          }
+        });
+
+        // Continue animation if particles are still active
+        if (activeParticles > 0) {
+          requestAnimationFrame(animateExplosion);
+        }
+      };
+
+      animateExplosion();
+    };
 
     // ============================================
     // WINDOW RESIZE
@@ -574,11 +715,21 @@ export default function WebGLBackground() {
 
       // Smooth scroll interpolation
       scrollRef.current.current += (scrollRef.current.target - scrollRef.current.current) * 0.05;
+      const scrollInfluence = scrollRef.current.current;
 
-      // Camera parallax
-      camera.position.x = mouseRef.current.x * 80;
-      camera.position.y = mouseRef.current.y * 80;
-      camera.lookAt(0, 0, 0);
+      // Camera journey through space based on scroll
+      // Move camera forward but stay further back for panoramic view
+      const scrollCameraZ = 800 - scrollInfluence * 800; // Moves from 800 to 0 (further back)
+      const scrollCameraY = scrollInfluence * 400 - 200; // Moves up and down (-200 to 200)
+      const scrollCameraX = Math.sin(scrollInfluence * Math.PI * 2) * 250; // Sways left-right
+
+      // Combine scroll-based position with mouse parallax
+      camera.position.x = scrollCameraX + mouseRef.current.x * 50;
+      camera.position.y = scrollCameraY + mouseRef.current.y * 50;
+      camera.position.z = scrollCameraZ;
+
+      // Look at center of the scene
+      camera.lookAt(0, 0, -300);
 
       // Animate stars - slow rotation and twinkling
       if (starsRef.current) {
@@ -597,34 +748,23 @@ export default function WebGLBackground() {
         starGeometry.attributes.size.needsUpdate = true;
       }
 
-      // Animate planets with scroll influence
-      const scrollInfluence = scrollRef.current.current;
+      // Animate planets - simple rotation and orbit
+      planetsRef.current.forEach((planet) => {
+        // Rotate on axis
+        planet.mesh.rotation.y += planet.rotationSpeed;
+        planet.mesh.rotation.x += planet.rotationSpeed * 0.1;
 
-      planetsRef.current.forEach((planet, index) => {
-        // Rotate on axis - speed increases with scroll
-        const scrollSpeedMultiplier = 1 + scrollInfluence * 2;
-        planet.mesh.rotation.y += planet.rotationSpeed * scrollSpeedMultiplier;
-        planet.mesh.rotation.x += planet.rotationSpeed * 0.1 * scrollSpeedMultiplier;
-
-        // Orbital motion - accelerated by scroll
-        planet.angle += planet.orbitSpeed * scrollSpeedMultiplier;
-        const baseX = planet.mesh.position.x;
-        const baseZ = planet.mesh.position.z;
+        // Orbital motion
+        planet.angle += planet.orbitSpeed;
         planet.mesh.position.x += Math.cos(planet.angle) * 0.2;
         planet.mesh.position.z += Math.sin(planet.angle) * 0.2;
-
-        // Additional scroll-based motion - planets drift based on scroll
-        const scrollOffset = scrollInfluence * Math.PI * 2;
-        const driftX = Math.sin(scrollOffset + index * 0.5) * 50;
-        const driftY = Math.cos(scrollOffset + index * 0.7) * 30;
-        planet.mesh.position.x += driftX * 0.01;
-        planet.mesh.position.y += driftY * 0.01;
 
         // Animate moons
         if (planet.moons && planet.moons.length > 0) {
           planet.moons.forEach((moon, i) => {
             const moonAngle = time * 0.5 + i * Math.PI;
-            const distance = planet.mesh.geometry.parameters.radius * 2.5;
+            const geometry = planet.mesh.geometry as THREE.SphereGeometry;
+            const distance = (geometry.parameters?.radius || 100) * 2.5;
             moon.position.x = Math.cos(moonAngle) * distance;
             moon.position.z = Math.sin(moonAngle) * distance;
             moon.rotation.y += 0.01;
@@ -645,6 +785,98 @@ export default function WebGLBackground() {
         if (Math.abs(asteroid.mesh.position.z) > 1000) asteroid.velocity.z *= -1;
       });
 
+      // Animate spacecraft
+      spacecraftRef.current.forEach((spacecraft, i) => {
+        // Move spacecraft
+        spacecraft.mesh.position.add(spacecraft.velocity);
+
+        // Apply rotation
+        spacecraft.mesh.rotation.x += spacecraft.rotationSpeed.x;
+        spacecraft.mesh.rotation.y += spacecraft.rotationSpeed.y;
+        spacecraft.mesh.rotation.z += spacecraft.rotationSpeed.z;
+
+        // Orient spacecraft in direction of travel
+        const direction = spacecraft.velocity.clone().normalize();
+        const targetQuaternion = new THREE.Quaternion().setFromUnitVectors(
+          new THREE.Vector3(0, 0, 1),
+          direction
+        );
+        spacecraft.mesh.quaternion.slerp(targetQuaternion, 0.1);
+
+        // Wrap around bounds (respawn on opposite side)
+        const bounds = 1200;
+        if (spacecraft.mesh.position.x > bounds) spacecraft.mesh.position.x = -bounds;
+        if (spacecraft.mesh.position.x < -bounds) spacecraft.mesh.position.x = bounds;
+        if (spacecraft.mesh.position.y > bounds) spacecraft.mesh.position.y = -bounds;
+        if (spacecraft.mesh.position.y < -bounds) spacecraft.mesh.position.y = bounds;
+        if (spacecraft.mesh.position.z > bounds) spacecraft.mesh.position.z = -bounds;
+        if (spacecraft.mesh.position.z < -bounds) spacecraft.mesh.position.z = bounds;
+
+        // Check collisions with other spacecraft
+        for (let j = i + 1; j < spacecraftRef.current.length; j++) {
+          const other = spacecraftRef.current[j];
+          const distance = spacecraft.mesh.position.distanceTo(other.mesh.position);
+
+          // Collision threshold (sum of approximate radii)
+          if (distance < 40) {
+            // Create explosion effect at collision point
+            const explosionPos = spacecraft.mesh.position.clone().lerp(other.mesh.position, 0.5);
+            createExplosion(explosionPos);
+
+            // Reflect velocities (simple collision response)
+            const temp = spacecraft.velocity.clone();
+            spacecraft.velocity.copy(other.velocity);
+            other.velocity.copy(temp);
+
+            // Add some randomness to prevent stuck collisions
+            spacecraft.velocity.add(
+              new THREE.Vector3(
+                (Math.random() - 0.5) * 2,
+                (Math.random() - 0.5) * 2,
+                (Math.random() - 0.5) * 2
+              )
+            );
+            other.velocity.add(
+              new THREE.Vector3(
+                (Math.random() - 0.5) * 2,
+                (Math.random() - 0.5) * 2,
+                (Math.random() - 0.5) * 2
+              )
+            );
+
+            // Move spacecraft apart to prevent continuous collision
+            const separation = explosionPos.clone().sub(spacecraft.mesh.position).normalize();
+            spacecraft.mesh.position.add(separation.multiplyScalar(-25));
+            other.mesh.position.add(separation.multiplyScalar(25));
+          }
+        }
+      });
+
+      // Update selected planet metadata position to stick to planet
+      if (selectedPlanetMeshRef.current && selectedPlanetDataRef.current) {
+        const vector = new THREE.Vector3();
+        selectedPlanetMeshRef.current.getWorldPosition(vector);
+        vector.project(camera);
+
+        const screenX = (vector.x * 0.5 + 0.5) * window.innerWidth;
+        const screenY = (-(vector.y * 0.5) + 0.5) * window.innerHeight;
+
+        // Calculate scale based on distance from camera
+        const distance = camera.position.distanceTo(selectedPlanetMeshRef.current.position);
+        const scale = Math.max(0.4, Math.min(1, 1000 / distance));
+
+        // Update ref data every frame
+        selectedPlanetDataRef.current.screenPos = { x: screenX, y: screenY };
+        selectedPlanetDataRef.current.scale = scale;
+
+        // Trigger React update by setting new state object
+        setSelectedPlanet({
+          dataset: selectedPlanetDataRef.current.dataset,
+          screenPos: { x: screenX, y: screenY },
+          scale,
+        });
+      }
+
       renderer.render(scene, camera);
     };
 
@@ -655,7 +887,9 @@ export default function WebGLBackground() {
     // ============================================
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("click", handleClick);
+      if (isHomePage) {
+        window.removeEventListener("click", handleClick);
+      }
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", handleResize);
 
@@ -680,6 +914,20 @@ export default function WebGLBackground() {
         scene.remove(asteroid.mesh);
       });
 
+      spacecraftRef.current.forEach((spacecraft) => {
+        spacecraft.mesh.traverse((child) => {
+          if (child instanceof THREE.Mesh) {
+            child.geometry.dispose();
+            if (Array.isArray(child.material)) {
+              child.material.forEach((mat) => mat.dispose());
+            } else {
+              child.material.dispose();
+            }
+          }
+        });
+        scene.remove(spacecraft.mesh);
+      });
+
       if (renderer) {
         renderer.dispose();
         containerRef.current?.removeChild(renderer.domElement);
@@ -688,14 +936,29 @@ export default function WebGLBackground() {
   }, []);
 
   return (
-    <div
-      ref={containerRef}
-      className="fixed top-0 left-0 w-full h-full"
-      style={{
-        zIndex: 0,
-        pointerEvents: 'none',
-        background: "radial-gradient(ellipse at center, #0f0f18 0%, #050508 50%, #000000 100%)",
-      }}
-    />
+    <>
+      <div
+        ref={containerRef}
+        className="fixed top-0 left-0 w-full h-full"
+        style={{
+          zIndex: 0,
+          pointerEvents: 'none',
+          background: "radial-gradient(ellipse at center, #0f0f18 0%, #050508 50%, #000000 100%)",
+        }}
+      />
+      {/* Only show planet metadata overlay on home page */}
+      {isHomePage && (
+        <PlanetMetadataOverlay
+          dataset={selectedPlanet?.dataset || null}
+          screenPosition={selectedPlanet?.screenPos || null}
+          scale={selectedPlanet?.scale || 1}
+          onClose={() => {
+            selectedPlanetMeshRef.current = null;
+            selectedPlanetDataRef.current = null;
+            setSelectedPlanet(null);
+          }}
+        />
+      )}
+    </>
   );
 }
