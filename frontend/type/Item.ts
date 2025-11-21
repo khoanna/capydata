@@ -1,11 +1,16 @@
 export interface Asset {
-  id: string;
-  blob_id: string;
-  owner: string;
+  id: {
+    id: string;
+  };
   title: string;
+  blob_id: string;
   description: string;
-  tags: string[];
-  price: number; 
+  filename: string;
+  filetype: string;
+  on_listed: boolean;
   amount_sold: number;
-  release_date: string;
+  owner: string;
+  price: number;
+  release_date: number;
+  tags: string[];
 }

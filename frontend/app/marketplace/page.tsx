@@ -4,9 +4,11 @@ import { useState, useMemo, useEffect } from "react";
 import { Search, X, Filter } from "lucide-react";
 import MarketplaceFilters from "@/components/Marketplace/MarketplaceFilters";
 import AssetGrid from "@/components/Marketplace/AssetGrid";
-import { filterAssets } from "@/lib/mockData";
+import { useAppContext } from "@/context/AppContext";
+import type { Asset } from "@/type/Item";
 
 export default function MarketplacePage() {
+  const { allListings, appLoading } = useAppContext();
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<"recent" | "popular" | "price">("popular");
@@ -15,14 +17,12 @@ export default function MarketplacePage() {
   const [maxPrice, setMaxPrice] = useState<number | undefined>(undefined);
 
   const availableTags = useMemo(() => {
-    const assetsForTags = filterAssets({
-      search: searchQuery || undefined,
-    });
+    if (!allListings) return [];
     
     const tags = new Set<string>();
-    assetsForTags.forEach((asset) => asset.tags.forEach((tag) => tags.add(tag)));
+    allListings.forEach((asset: Asset) => asset.tags.forEach((tag: string) => tags.add(tag)));
     return Array.from(tags).sort();
-  }, [searchQuery]);
+  }, [allListings]);
 
   useEffect(() => {
     if (selectedTags.length > 0) {
@@ -34,21 +34,47 @@ export default function MarketplacePage() {
   }, [availableTags, selectedTags]);
 
   const filteredAssets = useMemo(() => {
-    let assets = filterAssets({
-      tags: selectedTags.length > 0 ? selectedTags : undefined,
-      search: searchQuery || undefined,
-      minPrice,
-      maxPrice,
-    });
+    if (!allListings) return [];
 
+    let assets: Asset[] = [...allListings];
+
+    // Filter by search query
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      assets = assets.filter(
+        (asset) =>
+          asset.title.toLowerCase().includes(query) ||
+          asset.description.toLowerCase().includes(query) ||
+          asset.tags.some((tag) => tag.toLowerCase().includes(query))
+      );
+    }
+
+    // Filter by tags
+    if (selectedTags.length > 0) {
+      assets = assets.filter((asset) =>
+        selectedTags.every((tag) => asset.tags.includes(tag))
+      );
+    }
+
+    // Filter by price range
+    if (minPrice !== undefined) {
+      assets = assets.filter((asset) => asset.price >= minPrice);
+    }
+    if (maxPrice !== undefined) {
+      assets = assets.filter((asset) => asset.price <= maxPrice);
+    }
+
+    // Sort
     if (sortBy === "popular") {
       assets = [...assets].sort((a, b) => b.amount_sold - a.amount_sold);
     } else if (sortBy === "price") {
       assets = [...assets].sort((a, b) => a.price - b.price);
+    } else if (sortBy === "recent") {
+      assets = [...assets].sort((a, b) => b.release_date - a.release_date);
     }
 
     return assets;
-  }, [selectedTags, searchQuery, sortBy, minPrice, maxPrice]);
+  }, [allListings, selectedTags, searchQuery, sortBy, minPrice, maxPrice]);
 
   const clearAllFilters = () => {
     setSelectedTags([]);
@@ -145,7 +171,16 @@ export default function MarketplacePage() {
 
           {/* Asset Grid */}
           <div className={showFilters ? "lg:col-span-9" : "lg:col-span-12"}>
-            <AssetGrid assets={filteredAssets} />
+            {appLoading ? (
+              <div className="flex items-center justify-center py-20">
+                <div className="text-center">
+                  <div className="w-12 h-12 border-4 border-yuzu border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                  <p className="font-mono text-sm text-gray-400">Loading datasets...</p>
+                </div>
+              </div>
+            ) : (
+              <AssetGrid assets={filteredAssets} />
+            )}
           </div>
         </div>
       </div>

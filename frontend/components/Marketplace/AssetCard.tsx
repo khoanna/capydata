@@ -22,8 +22,21 @@ const AssetCard = ({ asset }: AssetCardProps) => {
     return sales.toString();
   };
 
+  // Format date - handle both number and string timestamps
+  const formatDate = (timestamp: number | string) => {
+    try {
+      const date = new Date(Number(timestamp));
+      if (isNaN(date.getTime())) {
+        return "Invalid Date";
+      }
+      return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    } catch (error) {
+      return "Invalid Date";
+    }
+  };
+
   return (
-    <Link href={`/item/${asset.id}`}>
+    <Link href={`/item/${asset.id.id}`}>
       <Card
         variant="glass"
         hover
@@ -77,7 +90,7 @@ const AssetCard = ({ asset }: AssetCardProps) => {
           {/* Footer - Release Date */}
           <div className="flex items-center justify-between pt-3 border-t border-white/10">
             <span className="font-mono text-xs text-gray-400">
-              {new Date(asset.release_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+              {formatDate(asset.release_date)}
             </span>
             
             <button className="px-3 py-1.5 bg-yuzu/10 hover:bg-yuzu text-yuzu hover:text-black border border-yuzu/30 hover:border-yuzu rounded font-mono text-xs font-bold transition-all">

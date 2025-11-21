@@ -6,6 +6,17 @@ import Badge from "@/components/Common/Badge";
 import Button from "@/components/Common/Button";
 import { formatPrice } from "@/lib/utils";
 
+// Format timestamp to readable date
+const formatDate = (timestamp: number | string): string => {
+  const date = new Date(Number(timestamp));
+  if (isNaN(date.getTime())) return "N/A";
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
+};
+
 interface SimpleAssetHeaderProps {
   asset: Asset;
   onPurchase?: () => void;
@@ -70,11 +81,7 @@ export default function SimpleAssetHeader({ asset, onPurchase }: SimpleAssetHead
               Released
             </p>
             <p className="font-mono text-sm text-white">
-              {new Date(asset.release_date).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
-              })}
+              {formatDate(asset.release_date)}
             </p>
           </div>
         </div>

@@ -52,7 +52,7 @@ const AssetGrid = ({ assets, isLoading = false }: AssetGridProps) => {
   return (
     <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {assets.map((asset, index) => (
-        <div key={asset.id} className={`stagger-${Math.min(index % 10 + 1, 10)}`}>
+        <div key={asset.id.id} className={`stagger-${Math.min(index % 10 + 1, 10)}`}>
           <AssetCard asset={asset} />
         </div>
       ))}

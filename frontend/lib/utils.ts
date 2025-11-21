@@ -129,3 +129,11 @@ export const generateDID = (): string => {
   ).join("");
   return `did:op:0x${hex}`;
 };
+
+export const suiToMist = (sui: number): number => {
+  return (Math.floor(sui * 1_000_000_000));
+}
+
+export const mistToSui = (mist: number): number => {
+  return mist / 1_000_000_000;
+}

@@ -3,7 +3,6 @@
 import dynamic from "next/dynamic";
 import { BookOpen, FileText, MessageCircle } from "lucide-react";
 
-// Import PublishWizard with no SSR to avoid WASM loading issues
 const PublishWizard = dynamic(
   () => import("@/components/Publish/PublishWizard"),
   { ssr: false }

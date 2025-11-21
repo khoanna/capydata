@@ -18,7 +18,7 @@ const PublishedTab = ({ address }: PublishedTabProps) => {
   const publishedAssets = mockAssets.slice(0, 6);
 
   const sortedAssets = [...publishedAssets].sort((a, b) => {
-    if (sortBy === "recent") return b.id.localeCompare(a.id);
+    if (sortBy === "recent") return b.id.id.localeCompare(a.id.id);
     if (sortBy === "popular") return b.amount_sold - a.amount_sold;
     if (sortBy === "revenue") return b.price * b.amount_sold - a.price * a.amount_sold;
     return 0;
@@ -53,7 +53,7 @@ const PublishedTab = ({ address }: PublishedTabProps) => {
       {publishedAssets.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {sortedAssets.map((asset, index) => (
-            <div key={asset.id} className="reveal" style={{ animationDelay: `${index * 100}ms` }}>
+            <div key={asset.id.id} className="reveal" style={{ animationDelay: `${index * 100}ms` }}>
               <AssetCard asset={asset} />
             </div>
           ))}

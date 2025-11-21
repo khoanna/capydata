@@ -7,7 +7,7 @@ module contract::marketplace {
     const ENotOwner:vector<u8> = b"Not owner";
 
     #[error]
-    const ENonPositivePrice:vector<u8> = b"Price should be larger than 0";
+    const ENegativePrice:vector<u8> = b"Price should be larger than or equal to 0";
 
     #[error]
     const EAlreadyMarketplaceOwner: vector<u8> = b"You are already the owner of this marketplace";
@@ -43,8 +43,7 @@ module contract::marketplace {
 
     public struct Dataset has key, store{
         id: UID,
-        // Object ID of the blob
-		blob_object_id: ID,
+		blob_id: String,
 		owner: address,
 		title: String,
         filename: String,
@@ -52,7 +51,6 @@ module contract::marketplace {
 		description: String,
 		tags: vector<String>,
 		price: u64,
-        // Number of buyers, in interger type
 		amount_sold: u64,
 		release_date: u64,
         on_listed: bool
@@ -87,7 +85,7 @@ module contract::marketplace {
 
         let dataset = Dataset {
             id: object::new(ctx),
-            blob_object_id,
+            blob_id,
             owner: ctx.sender(),
             title,
             filename,
@@ -150,8 +148,8 @@ module contract::marketplace {
 
 
     // Getter functions
-    public fun get_blob_object_id(dataset: &Dataset):ID{
-        dataset.blob_object_id
+    public fun get_blob_id(dataset: &Dataset): String{
+        dataset.blob_id
     }
     public fun get_owner(dataset: &Dataset):address{
         dataset.owner

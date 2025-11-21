@@ -2,10 +2,10 @@
 
 import { use, useState } from "react";
 import { ChevronRight, Sparkles, ArrowRight } from "lucide-react";
-import { getAssetById } from "@/lib/mockData";
 import { notFound } from "next/navigation";
 import SimpleAssetHeader from "@/components/ItemDetail/SimpleAssetHeader";
 import Link from "next/link";
+import { useAppContext } from "@/context/AppContext";
 
 export default function ItemDetailPage({
   params,
@@ -13,9 +13,29 @@ export default function ItemDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const asset = getAssetById(id);
+  const { allListings, appLoading } = useAppContext();
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
 
+  // Find the asset by ID from real data
+  const asset = allListings?.find((item) => item.id.id === id);
+
+  // Show loading state while data is being fetched OR if allListings is not yet available
+  if (appLoading || !allListings) {
+    return (
+      <main className="min-h-screen pt-28 pb-20 bg-void">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex items-center justify-center py-20">
+            <div className="text-center">
+              <div className="w-12 h-12 border-4 border-yuzu border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="font-mono text-sm text-gray-400">Loading dataset...</p>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  // Only show not found if we have listings but asset is not in them
   if (!asset) {
     notFound();
   }
@@ -58,18 +78,18 @@ export default function ItemDetailPage({
           </div>
 
           {/* Stats Section */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 reveal delay-200">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 reveal delay-200">
             <div className="glass-card p-6 rounded-xl">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 rounded-full bg-yuzu/10 flex items-center justify-center">
                   <Sparkles className="w-5 h-5 text-yuzu" />
                 </div>
                 <p className="font-mono text-xs text-gray-500 uppercase tracking-wider">
-                  Quality Score
+                  File Type
                 </p>
               </div>
-              <p className="text-2xl font-sans font-bold text-white">
-                {Math.min(95, 80 + Math.floor(asset.amount_sold / 100))}%
+              <p className="text-2xl font-sans font-bold text-white uppercase">
+                {asset.filetype}
               </p>
             </div>
 
@@ -77,6 +97,20 @@ export default function ItemDetailPage({
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 rounded-full bg-grass/10 flex items-center justify-center">
                   <ArrowRight className="w-5 h-5 text-grass" />
+                </div>
+                <p className="font-mono text-xs text-gray-500 uppercase tracking-wider">
+                  Total Sales
+                </p>
+              </div>
+              <p className="text-2xl font-sans font-bold text-white">
+                {asset.amount_sold.toLocaleString()}
+              </p>
+            </div>
+
+            <div className="glass-card p-6 rounded-xl">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full bg-hydro/10 flex items-center justify-center">
+                  <Sparkles className="w-5 h-5 text-hydro" />
                 </div>
                 <p className="font-mono text-xs text-gray-500 uppercase tracking-wider">
                   Total Revenue
@@ -89,15 +123,15 @@ export default function ItemDetailPage({
 
             <div className="glass-card p-6 rounded-xl">
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-full bg-hydro/10 flex items-center justify-center">
-                  <Sparkles className="w-5 h-5 text-hydro" />
+                <div className="w-10 h-10 rounded-full bg-yuzu/10 flex items-center justify-center">
+                  <Sparkles className="w-5 h-5 text-yuzu" />
                 </div>
                 <p className="font-mono text-xs text-gray-500 uppercase tracking-wider">
-                  Popularity
+                  Status
                 </p>
               </div>
               <p className="text-2xl font-sans font-bold text-white">
-                {asset.amount_sold > 1000 ? 'High' : asset.amount_sold > 500 ? 'Medium' : 'Growing'}
+                {asset.on_listed ? 'Listed' : 'Unlisted'}
               </p>
             </div>
           </div>
@@ -110,7 +144,7 @@ export default function ItemDetailPage({
             Similar Datasets
           </h2>
           <p className="font-mono text-sm text-gray-400 mb-6">
-            Explore more datasets in the same category
+            Explore more datasets with similar tags
           </p>
           <Link href="/marketplace">
             <button className="px-6 py-3 glass-input rounded-lg hover:border-yuzu/50 transition-all font-mono text-sm text-white flex items-center gap-2 group">

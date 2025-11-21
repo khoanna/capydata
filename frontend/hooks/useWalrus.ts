@@ -73,7 +73,7 @@ export default function useWalrus() {
     });
     await flow.encode();
     const registerTx = flow.register({
-      epochs: 3,
+      epochs: 1,
       owner: address,
       deletable: true,
     });
