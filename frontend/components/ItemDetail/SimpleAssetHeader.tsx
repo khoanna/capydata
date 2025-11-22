@@ -34,9 +34,6 @@ export default function SimpleAssetHeader({ asset, onPurchase, loading, isOwner,
           <h1 className="text-4xl font-sans font-bold text-white mb-3">
             {asset.title}
           </h1>
-          <p className="font-mono text-sm text-gray-400 leading-relaxed">
-            {asset.description}
-          </p>
         </div>
 
         <div className="lg:text-right">

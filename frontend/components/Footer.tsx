@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Image from "next/image";
 import React from "react";
 
@@ -31,24 +32,19 @@ const Footer = ({ transparent = false }: FooterProps) => {
             <h4 className="font-sans font-bold mb-4 text-white">MARKETPLACE</h4>
             <ul className="space-y-2 font-mono text-xs text-gray-500">
               <li>
-                <a href="#" className="hover:text-yuzu transition-colors">
+                <Link href="/marketplace" className="hover:text-yuzu transition-colors">
                   All Datasets
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-yuzu transition-colors">
+                <Link href="/publish" className="hover:text-yuzu transition-colors">
                   Become a Seller
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-yuzu transition-colors">
+                <Link href="#" className="hover:text-yuzu transition-colors">
                   Data API
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-yuzu transition-colors">
-                  Pricing
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -56,17 +52,14 @@ const Footer = ({ transparent = false }: FooterProps) => {
             <h4 className="font-sans font-bold mb-4 text-white">COMMUNITY</h4>
             <ul className="space-y-2 font-mono text-xs text-gray-500">
               <li>
-                <a href="#" className="hover:text-yuzu transition-colors">
+                <a target="_blank" href="https://x.com/CapyDataMarket" className="hover:text-yuzu transition-colors">
                   Twitter / X
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-yuzu transition-colors">
-                  Discord
-                </a>
               </li>
               <li>
-                <a href="#" className="hover:text-yuzu transition-colors">
+                <a target="_blank" href="https://github.com/khoanna/decentralized-data-marketplace" className="hover:text-yuzu transition-colors">
                   GitHub
                 </a>
               </li>

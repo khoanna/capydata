@@ -1,5 +1,5 @@
 "use client";
-import { ArrowRight, Inbox, Trophy, UploadCloud } from "lucide-react";
+import { ArrowRight, Edit, Inbox, Trophy, UploadCloud } from "lucide-react";
 
 import { useState } from "react";
 import AssetCard from "@/components/Marketplace/AssetCard";

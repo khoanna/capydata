@@ -32,7 +32,6 @@ const MetadataStep = ({ formData, updateFormData, onTagDropdownOpenChange }: Met
         value={formData.title}
         onChange={(e) => updateFormData({ title: e.target.value })}
         hint="Choose a clear, descriptive title"
-        icon={<Heading className="w-4 h-4" />}
       />
 
       <TextArea
