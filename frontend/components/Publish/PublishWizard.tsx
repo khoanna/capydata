@@ -192,12 +192,15 @@ const PublishWizard = () => {
       {/* Tech Progress Pipeline */}
       <div className="mb-24 relative">
         {/* Background Line */}
-        <div className="absolute top-1/2 left-0 w-full h-1 bg-white/5 -translate-y-1/2 rounded-full"></div>
-        
-        {/* Active Progress Line */}
-        <div 
-          className="absolute top-1/2 left-0 h-1 bg-linear-to-r from-hydro to-yuzu -translate-y-1/2 rounded-full transition-all duration-500 ease-out shadow-[0_0_10px_rgba(255,159,28,0.5)]"
-          style={{ width: `${((currentStep - 1) / (steps.length - 1)) * 100}%` }}
+        <div className="absolute top-1/2 left-0 w-full h-1 bg-[#222222] -translate-y-1/2"></div>
+
+        {/* Active Progress Line with Smooth Gradient */}
+        <div
+          className="absolute top-1/2 left-0 h-1 -translate-y-1/2 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] shadow-[0_0_10px_rgba(0,240,255,0.5)]"
+          style={{
+            width: `${((currentStep - 1) / (steps.length - 1)) * 100}%`,
+            background: 'linear-gradient(90deg, #00F0FF, #FFAA00)'
+          }}
         ></div>
 
         {/* Steps */}
@@ -207,39 +210,61 @@ const PublishWizard = () => {
             const isCompleted = currentStep > step.number;
 
             return (
-              <div key={step.number} className="flex flex-col items-center group relative z-10">
-                
-                {/* The Node */}
+              <div key={step.number} className="flex flex-col items-center group relative z-10 w-[120px]">
+
+                {/* Icon Container */}
                 <div
                   className={`
-                    w-12 h-12 flex items-center justify-center border-2 transform transition-all duration-300
-                    ${isActive 
-                      ? "bg-black border-yuzu scale-125 shadow-[0_0_20px_rgba(255,159,28,0.3)]" 
-                      : isCompleted 
-                        ? "bg-hydro/20 border-hydro text-hydro" 
-                        : "bg-black border-white/10 text-gray-600"
+                    w-[60px] h-[60px] flex items-center justify-center border-2 bg-void
+                    transform transition-all duration-400 ease-out relative
+                    ${isActive
+                      ? "border-yuzu text-yuzu scale-[1.2] rotate-45 rounded-xl shadow-[0_0_20px_rgba(255,170,0,0.5),0_0_40px_rgba(255,170,0,0.2)] animate-pulse"
+                      : isCompleted
+                        ? "border-hydro text-hydro rounded-full shadow-[0_0_15px_rgba(0,240,255,0.3),inset_0_0_10px_rgba(0,240,255,0.1)]"
+                        : "border-[#222222] text-gray-600 rounded-full"
                     }
-                    ${isActive ? "rotate-45 rounded-lg" : "rounded-full"} 
                   `}
+                  style={{
+                    backgroundColor: isActive ? '#110b00' : '#050505'
+                  }}
                 >
-                  <div className={`${isActive ? "-rotate-45" : ""} transition-transform`}>
-                    {isCompleted ? <Check className="w-5 h-5" /> : step.icon}
+                  <div className={`${isActive ? "-rotate-45" : ""} transition-transform duration-300`}>
+                    {isCompleted ? <Check className="w-6 h-6" /> : step.icon}
                   </div>
                 </div>
 
                 {/* Labels */}
-                <div className={`absolute top-16 flex flex-col items-center text-center w-32 transition-opacity duration-300 ${isActive || isCompleted ? "opacity-100" : "opacity-50"}`}>
-                  <span className={`font-mono text-[10px] tracking-widest mb-1 ${isActive ? "text-yuzu" : isCompleted ? "text-hydro" : "text-gray-500"}`}>
+                <div
+                  className={`flex flex-col items-center text-center w-full transition-all duration-300 ${
+                    isActive ? 'mt-8 opacity-100' : 'mt-5 opacity-30'
+                  }`}
+                >
+                  {/* Number */}
+                  <span
+                    className={`font-mono text-xs tracking-widest mb-1 transition-all duration-300 ${
+                      isActive
+                        ? 'text-yuzu opacity-100 translate-y-0'
+                        : isCompleted
+                          ? 'text-hydro opacity-100 translate-y-0'
+                          : 'text-hydro opacity-0 translate-y-1'
+                    }`}
+                  >
                     0{step.number}
                   </span>
-                  <span className={`font-sans font-bold text-xs ${isActive ? "text-white" : "text-gray-400"}`}>
+
+                  {/* Title */}
+                  <span className={`font-mono text-[0.9rem] font-bold uppercase tracking-wide ${isActive ? "text-white" : "text-gray-400"}`}>
                     {step.title}
                   </span>
-                  {isActive && (
-                     <span className="text-[10px] text-gray-500 font-mono mt-1 hidden md:block">
-                       [{step.sub}]
-                     </span>
-                  )}
+
+                  {/* Subtitle - only show on active */}
+                  <span
+                    className={`font-mono text-xs text-gray-500 mt-1 transition-all duration-300 ${
+                      isActive ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-1'
+                    }`}
+                  >
+                    {isActive && `[${step.sub}]`}
+                  </span>
                 </div>
               </div>
             );

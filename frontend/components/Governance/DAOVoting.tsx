@@ -28,7 +28,7 @@ const DAOVoting = () => {
   const [selectedProposal, setSelectedProposal] = useState<string | null>(null);
 
   // Mock governance data
-  const votingPower = 7500; // User's staked CAPY
+  const votingPower = 7500; // User's staked SUI
 
   const proposals: Proposal[] = [
     {
@@ -48,9 +48,9 @@ const DAOVoting = () => {
     },
     {
       id: "2",
-      title: "Allocate 50,000 CAPY for AI Dataset Bounty Program",
+      title: "Allocate 50,000 SUI for AI Dataset Bounty Program",
       description:
-        "Create a bounty program with 50,000 CAPY from the treasury to incentivize high-quality AI training datasets. Datasets meeting quality criteria will receive rewards.",
+        "Create a bounty program with 50,000 SUI from the treasury to incentivize high-quality AI training datasets. Datasets meeting quality criteria will receive rewards.",
       proposer: "0x8Ba1f109551bD432803012C1...3f8A",
       status: "active",
       votesFor: 98700,
@@ -163,7 +163,7 @@ const DAOVoting = () => {
               Your Voting Power
             </h3>
             <p className="font-mono text-sm text-gray-400">
-              Based on your staked CAPY tokens
+              Based on your staked SUI tokens
             </p>
           </div>
           <div className="text-right">
@@ -409,7 +409,7 @@ const DAOVoting = () => {
             </h3>
             <ul className="space-y-2">
               {[
-                "Voting power is based on your staked CAPY tokens",
+                "Voting power is based on your staked SUI tokens",
                 "Proposals need to reach quorum to be valid",
                 "Active proposals have a 7-day voting period",
                 "You can change your vote anytime before the voting period ends",

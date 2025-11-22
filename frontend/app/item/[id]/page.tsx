@@ -150,7 +150,7 @@ export default function ItemDetailPage({
                 </p>
               </div>
               <p className="text-2xl font-sans font-bold text-white">
-                {(asset.price * asset.amount_sold).toLocaleString()} CAPY
+                {(asset.price * asset.amount_sold).toLocaleString()} SUI
               </p>
             </div>
 

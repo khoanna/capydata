@@ -2,7 +2,7 @@
 import { Check, Coins, Download, DownloadCloud, Gift, Info, Layers, Lock, MinusCircle, PlusCircle, TrendingUp } from "lucide-react";
 
 import { useState } from "react";
-import { formatPrice, capyToUSD, formatUSD } from "@/lib/utils";
+import { formatPrice, suiToUSD, formatUSD } from "@/lib/utils";
 import Button from "@/components/Common/Button";
 import { Input } from "@/components/Common/Input";
 import Badge from "@/components/Common/Badge";
@@ -79,7 +79,7 @@ const DataFarming = () => {
 
     addToast("Staking transaction submitted...", "pending");
     setTimeout(() => {
-      addToast(`Successfully staked ${stakeAmount} CAPY!`, "success");
+      addToast(`Successfully staked ${stakeAmount} SUI!`, "success");
       setStakeAmount("");
       setSelectedPool(null);
     }, 2000);
@@ -89,14 +89,14 @@ const DataFarming = () => {
     addToast("Claiming rewards...", "pending");
     setTimeout(() => {
       const pool = pools.find((p) => p.id === poolId);
-      addToast(`Claimed ${pool?.pendingRewards} CAPY rewards!`, "success");
+      addToast(`Claimed ${pool?.pendingRewards} SUI rewards!`, "success");
     }, 2000);
   };
 
   const handleClaimAll = () => {
     addToast("Claiming all rewards...", "pending");
     setTimeout(() => {
-      addToast(`Claimed ${totalPending.toFixed(2)} CAPY rewards!`, "success");
+      addToast(`Claimed ${totalPending.toFixed(2)} SUI rewards!`, "success");
     }, 2000);
   };
 
@@ -114,7 +114,7 @@ const DataFarming = () => {
             <span className="text-sm ml-1">CAPY</span>
           </p>
           <p className="font-mono text-xs text-gray-500">
-            ≈ {formatUSD(capyToUSD(totalStaked))}
+            ≈ {formatUSD(suiToUSD(totalStaked))}
           </p>
         </div>
 
@@ -128,7 +128,7 @@ const DataFarming = () => {
             <span className="text-sm ml-1">CAPY</span>
           </p>
           <p className="font-mono text-xs text-gray-500">
-            ≈ {formatUSD(capyToUSD(totalPending))}
+            ≈ {formatUSD(suiToUSD(totalPending))}
           </p>
         </div>
 
@@ -162,7 +162,7 @@ const DataFarming = () => {
                 Harvest All Rewards
               </h3>
               <p className="font-mono text-sm text-gray-400">
-                Claim {totalPending.toFixed(2)} CAPY from all pools
+                Claim {totalPending.toFixed(2)} SUI from all pools
               </p>
             </div>
             <Button variant="primary" size="lg" onClick={handleClaimAll}>
@@ -229,7 +229,7 @@ const DataFarming = () => {
                   <div className="p-3 glass-input rounded-lg">
                     <p className="font-mono text-xs text-gray-400 mb-1">Pending</p>
                     <p className="font-mono text-sm font-bold text-yuzu">
-                      {pool.pendingRewards.toFixed(2)} CAPY
+                      {pool.pendingRewards.toFixed(2)} SUI
                     </p>
                   </div>
                 </div>
@@ -244,7 +244,7 @@ const DataFarming = () => {
                       placeholder="Amount to stake"
                       value={stakeAmount}
                       onChange={(e) => setStakeAmount(e.target.value)}
-                      hint="Enter CAPY amount"
+                      hint="Enter SUI amount"
                       icon={<Coins className="w-4 h-4" />}
                     />
                     <div className="flex gap-2">
@@ -276,7 +276,7 @@ const DataFarming = () => {
                     className="w-full"
                   >
                     <PlusCircle className="w-5 h-5" />
-                    Stake CAPY
+                    Stake SUI
                   </Button>
                 )}
 
@@ -294,7 +294,7 @@ const DataFarming = () => {
                         className="w-full"
                       >
                         <Download className="w-5 h-5" />
-                        Claim {pool.pendingRewards.toFixed(2)} CAPY
+                        Claim {pool.pendingRewards.toFixed(2)} SUI
                       </Button>
                     )}
                   </>
@@ -315,7 +315,7 @@ const DataFarming = () => {
             </h3>
             <ul className="space-y-2">
               {[
-                "Stake your CAPY tokens in one or more pools to earn rewards",
+                "Stake your SUI tokens in one or more pools to earn rewards",
                 "Longer lock periods provide higher APY and reward multipliers",
                 "Rewards are calculated and distributed every block",
                 "Claim rewards anytime without unstaking your principal",

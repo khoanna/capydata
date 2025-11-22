@@ -143,7 +143,7 @@ const IdentityHeader = ({ address }: IdentityHeaderProps) => {
                 <p className="font-mono text-xs text-gray-400 mb-1">Total Earned</p>
                 <p className="font-sans text-2xl font-bold text-yuzu">
                   {userData.stats.earned.toLocaleString()}
-                  <span className="text-sm ml-1">CAPY</span>
+                  <span className="text-sm ml-1">SUI</span>
                 </p>
               </div>
               <div className="p-4 glass-input rounded-lg">

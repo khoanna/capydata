@@ -23,7 +23,7 @@ export default function GovernancePage() {
           </h1>
           <p className="font-mono text-sm text-gray-400 max-w-2xl">
             Participate in CapyData governance through data farming rewards and DAO voting.
-            Stake your CAPY tokens to earn rewards and shape the future of the protocol.
+            Stake your SUI tokens to earn rewards and shape the future of the protocol.
           </p>
         </div>
 

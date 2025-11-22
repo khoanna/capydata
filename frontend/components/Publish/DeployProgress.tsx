@@ -110,7 +110,7 @@ const DeployProgress = ({ formData, txResult, onComplete }: DeployProgressProps)
             <div className="flex items-center justify-between">
               <span className="font-mono text-xs text-gray-400">Price</span>
               <span className="font-mono text-sm text-yuzu font-bold">
-                {formData.price} CAPY
+                {formData.price} SUI
               </span>
             </div>
           )}

@@ -3,6 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import * as THREE from "three";
+// @ts-ignore
+import { CSS3DRenderer, CSS3DObject } from "three/examples/jsm/renderers/CSS3DRenderer";
+import { createRoot, Root } from "react-dom/client";
 import PlanetMetadataOverlay from "./PlanetMetadataOverlay";
 
 interface DatasetMetadata {
@@ -44,6 +47,7 @@ export default function WebGLBackground() {
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+  const cssRendererRef = useRef<CSS3DRenderer | null>(null);
   const mouseRef = useRef({ x: 0, y: 0, targetX: 0, targetY: 0 });
   const scrollRef = useRef({ current: 0, target: 0 });
   const hoveredPlanetRef = useRef<THREE.Mesh | null>(null);
@@ -52,19 +56,12 @@ export default function WebGLBackground() {
   const asteroidsRef = useRef<Asteroid[]>([]);
   const spacecraftRef = useRef<Spacecraft[]>([]);
   const animationFrameRef = useRef<number | undefined>(undefined);
+  const sunRef = useRef<{ mesh: THREE.Mesh, glow: THREE.Mesh } | null>(null);
+  
+  // CSS3D Refs
   const selectedPlanetMeshRef = useRef<THREE.Mesh | null>(null);
-  const selectedPlanetDataRef = useRef<{
-    dataset: DatasetMetadata;
-    screenPos: { x: number; y: number };
-    scale: number;
-  } | null>(null);
-
-  // State for selected planet metadata overlay
-  const [selectedPlanet, setSelectedPlanet] = useState<{
-    dataset: DatasetMetadata;
-    screenPos: { x: number; y: number };
-    scale: number;
-  } | null>(null);
+  const cssObjectRef = useRef<CSS3DObject | null>(null);
+  const metadataRootRef = useRef<Root | null>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -89,7 +86,7 @@ export default function WebGLBackground() {
     camera.position.y = 0;
     cameraRef.current = camera;
 
-    // Renderer setup
+    // WebGL Renderer setup
     const renderer = new THREE.WebGLRenderer({
       alpha: true,
       antialias: !isMobile,
@@ -97,8 +94,21 @@ export default function WebGLBackground() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.domElement.style.pointerEvents = 'auto';
+    renderer.domElement.style.position = 'absolute';
+    renderer.domElement.style.top = '0';
+    renderer.domElement.style.zIndex = '1';
     containerRef.current.appendChild(renderer.domElement);
     rendererRef.current = renderer;
+
+    // CSS3D Renderer setup
+    const cssRenderer = new CSS3DRenderer();
+    cssRenderer.setSize(window.innerWidth, window.innerHeight);
+    cssRenderer.domElement.style.position = 'absolute';
+    cssRenderer.domElement.style.top = '0';
+    cssRenderer.domElement.style.pointerEvents = 'none'; // Allow clicks to pass through to WebGL canvas
+    cssRenderer.domElement.style.zIndex = '2'; // Overlay on top
+    containerRef.current.appendChild(cssRenderer.domElement);
+    cssRendererRef.current = cssRenderer;
 
     // ============================================
     // LIGHTING SYSTEM
@@ -106,8 +116,10 @@ export default function WebGLBackground() {
     const ambientLight = new THREE.AmbientLight(0x606080, 0.4);
     scene.add(ambientLight);
 
-    const sunLight = new THREE.PointLight(0xffffee, 2, 2500);
-    sunLight.position.set(800, 400, 600);
+    // Sun light positioned to match sun object - subdued intensity
+    const sunLight = new THREE.PointLight(0xffbb88, 2.0, 3500);
+    sunLight.position.set(1000, 600, -1200);
+    sunLight.castShadow = false;
     scene.add(sunLight);
 
     const backLight = new THREE.DirectionalLight(0x4488ff, 0.5);
@@ -115,7 +127,283 @@ export default function WebGLBackground() {
     scene.add(backLight);
 
     // ============================================
-    // STAR FIELD - Much more visible
+    // SUN OBJECT - Cinematic realistic sun
+    // ============================================
+    const createSun = () => {
+      // Sun core with turbulence shader - larger for cinematic effect
+      const sunGeometry = new THREE.SphereGeometry(200, 128, 128);
+      
+      // Custom shader for realistic burning sun effect
+      const vertexShader = `
+        varying vec2 vUv;
+        varying vec3 vNormal;
+        varying vec3 vPosition;
+        uniform float time;
+        
+        // 3D Noise function for surface displacement
+        vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+        vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+        vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
+        vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+        
+        float snoise(vec3 v) {
+          const vec2 C = vec2(1.0/6.0, 1.0/3.0);
+          const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
+          vec3 i  = floor(v + dot(v, C.yyy));
+          vec3 x0 = v - i + dot(i, C.xxx);
+          vec3 g = step(x0.yzx, x0.xyz);
+          vec3 l = 1.0 - g;
+          vec3 i1 = min(g.xyz, l.zxy);
+          vec3 i2 = max(g.xyz, l.zxy);
+          vec3 x1 = x0 - i1 + C.xxx;
+          vec3 x2 = x0 - i2 + C.yyy;
+          vec3 x3 = x0 - D.yyy;
+          i = mod289(i);
+          vec4 p = permute(permute(permute(
+                     i.z + vec4(0.0, i1.z, i2.z, 1.0))
+                   + i.y + vec4(0.0, i1.y, i2.y, 1.0))
+                   + i.x + vec4(0.0, i1.x, i2.x, 1.0));
+          float n_ = 0.142857142857;
+          vec3 ns = n_ * D.wyz - D.xzx;
+          vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
+          vec4 x_ = floor(j * ns.z);
+          vec4 y_ = floor(j - 7.0 * x_);
+          vec4 x = x_ * ns.x + ns.yyyy;
+          vec4 y = y_ * ns.x + ns.yyyy;
+          vec4 h = 1.0 - abs(x) - abs(y);
+          vec4 b0 = vec4(x.xy, y.xy);
+          vec4 b1 = vec4(x.zw, y.zw);
+          vec4 s0 = floor(b0)*2.0 + 1.0;
+          vec4 s1 = floor(b1)*2.0 + 1.0;
+          vec4 sh = -step(h, vec4(0.0));
+          vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy;
+          vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww;
+          vec3 p0 = vec3(a0.xy, h.x);
+          vec3 p1 = vec3(a0.zw, h.y);
+          vec3 p2 = vec3(a1.xy, h.z);
+          vec3 p3 = vec3(a1.zw, h.w);
+          vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2,p2), dot(p3,p3)));
+          p0 *= norm.x;
+          p1 *= norm.y;
+          p2 *= norm.z;
+          p3 *= norm.w;
+          vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+          m = m * m;
+          return 42.0 * dot(m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
+        }
+        
+        void main() {
+          vUv = uv;
+          vNormal = normalize(normalMatrix * normal);
+          
+          // Multi-octave noise for realistic solar flare surface
+          float noise1 = snoise(normal * 2.0 + time * 0.05);
+          float noise2 = snoise(normal * 4.0 + time * 0.08);
+          float noise3 = snoise(normal * 8.0 + time * 0.12);
+          float displacement = (noise1 * 0.5 + noise2 * 0.3 + noise3 * 0.2) * 8.0;
+          
+          vec3 newPosition = position + normal * displacement;
+          vPosition = newPosition;
+          
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
+        }
+      `;
+
+      const fragmentShader = `
+        varying vec2 vUv;
+        varying vec3 vNormal;
+        varying vec3 vPosition;
+        uniform float time;
+        
+        // Simplex noise function
+        vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+        vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+        vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
+        vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+        
+        float snoise(vec3 v) {
+          const vec2 C = vec2(1.0/6.0, 1.0/3.0);
+          const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
+          vec3 i  = floor(v + dot(v, C.yyy));
+          vec3 x0 = v - i + dot(i, C.xxx);
+          vec3 g = step(x0.yzx, x0.xyz);
+          vec3 l = 1.0 - g;
+          vec3 i1 = min(g.xyz, l.zxy);
+          vec3 i2 = max(g.xyz, l.zxy);
+          vec3 x1 = x0 - i1 + C.xxx;
+          vec3 x2 = x0 - i2 + C.yyy;
+          vec3 x3 = x0 - D.yyy;
+          i = mod289(i);
+          vec4 p = permute(permute(permute(
+                     i.z + vec4(0.0, i1.z, i2.z, 1.0))
+                   + i.y + vec4(0.0, i1.y, i2.y, 1.0))
+                   + i.x + vec4(0.0, i1.x, i2.x, 1.0));
+          float n_ = 0.142857142857;
+          vec3 ns = n_ * D.wyz - D.xzx;
+          vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
+          vec4 x_ = floor(j * ns.z);
+          vec4 y_ = floor(j - 7.0 * x_);
+          vec4 x = x_ * ns.x + ns.yyyy;
+          vec4 y = y_ * ns.x + ns.yyyy;
+          vec4 h = 1.0 - abs(x) - abs(y);
+          vec4 b0 = vec4(x.xy, y.xy);
+          vec4 b1 = vec4(x.zw, y.zw);
+          vec4 s0 = floor(b0)*2.0 + 1.0;
+          vec4 s1 = floor(b1)*2.0 + 1.0;
+          vec4 sh = -step(h, vec4(0.0));
+          vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy;
+          vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww;
+          vec3 p0 = vec3(a0.xy, h.x);
+          vec3 p1 = vec3(a0.zw, h.y);
+          vec3 p2 = vec3(a1.xy, h.z);
+          vec3 p3 = vec3(a1.zw, h.w);
+          vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2,p2), dot(p3,p3)));
+          p0 *= norm.x;
+          p1 *= norm.y;
+          p2 *= norm.z;
+          p3 *= norm.w;
+          vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+          m = m * m;
+          return 42.0 * dot(m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
+        }
+
+        void main() {
+          // Multi-layered turbulent noise for realistic solar surface
+          vec3 noiseCoord = vPosition * 0.01;
+          float noiseVal1 = snoise(vec3(vUv * 3.0, time * 0.08));
+          float noiseVal2 = snoise(vec3(vUv * 6.0 + 100.0, time * 0.12));
+          float noiseVal3 = snoise(vec3(vUv * 12.0 - 200.0, time * 0.15));
+          
+          float combinedNoise = noiseVal1 * 0.5 + noiseVal2 * 0.3 + noiseVal3 * 0.2;
+          
+          // Realistic sun colors - subdued, not too bright
+          vec3 deepRed = vec3(0.5, 0.08, 0.0);      // Deep crimson core
+          vec3 darkOrange = vec3(0.7, 0.25, 0.05);  // Burning orange
+          vec3 warmYellow = vec3(0.85, 0.55, 0.25); // Warm yellow corona
+          
+          // Mix colors based on noise for plasma effect
+          vec3 baseColor = mix(deepRed, darkOrange, combinedNoise * 0.5 + 0.5);
+          baseColor = mix(baseColor, warmYellow, pow(combinedNoise * 0.5 + 0.5, 2.0) * 0.6);
+          
+          // Fresnel effect for edge glow (subdued)
+          vec3 viewDirection = normalize(cameraPosition - vPosition);
+          float fresnel = pow(1.0 - abs(dot(viewDirection, vNormal)), 2.5);
+          vec3 fresnelColor = vec3(0.65, 0.35, 0.15) * fresnel * 0.7;
+          
+          // Add some darker spots (sunspots)
+          float spotNoise = snoise(vPosition * 0.15 + time * 0.02);
+          float spots = smoothstep(0.3, 0.5, spotNoise);
+          baseColor = mix(baseColor * 0.4, baseColor, spots);
+          
+          vec3 finalColor = baseColor + fresnelColor;
+          
+          // Enhanced visibility while keeping cinematic look
+          finalColor = finalColor * 1.8;
+
+          gl_FragColor = vec4(finalColor, 1.0);
+        }
+      `;
+
+      const sunMaterial = new THREE.ShaderMaterial({
+        uniforms: {
+          time: { value: 0 }
+        },
+        vertexShader,
+        fragmentShader,
+        side: THREE.FrontSide,
+        transparent: false
+      });
+
+      const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+      // Position sun in visible area - upper right background for cinematic effect
+      sun.position.set(1000, 600, -1200);
+      scene.add(sun);
+
+      // Sun Corona/Atmosphere - Multiple layers for realism
+      const coronaGeometry = new THREE.SphereGeometry(240, 64, 64);
+      const coronaMaterial = new THREE.ShaderMaterial({
+        uniforms: {
+          time: { value: 0 },
+          glowColor: { value: new THREE.Color(0xff6622) }
+        },
+        vertexShader: `
+          varying vec3 vNormal;
+          varying vec3 vPosition;
+          void main() {
+            vNormal = normalize(normalMatrix * normal);
+            vPosition = position;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }
+        `,
+        fragmentShader: `
+          uniform vec3 glowColor;
+          uniform float time;
+          varying vec3 vNormal;
+          varying vec3 vPosition;
+          
+          void main() {
+            vec3 viewDirection = normalize(cameraPosition - vPosition);
+            float intensity = pow(0.6 - dot(vNormal, viewDirection), 3.5);
+            
+            // Pulsating effect
+            float pulse = sin(time * 0.5) * 0.15 + 0.95;
+            intensity *= pulse;
+            
+            vec3 glow = glowColor * intensity * 0.8; // Enhanced glow for visibility
+            gl_FragColor = vec4(glow, intensity * 0.8);
+          }
+        `,
+        side: THREE.BackSide,
+        blending: THREE.AdditiveBlending,
+        transparent: true,
+        depthWrite: false
+      });
+
+      const corona = new THREE.Mesh(coronaGeometry, coronaMaterial);
+      corona.position.copy(sun.position);
+      scene.add(corona);
+
+      // Outer atmospheric glow - very subtle
+      const atmoGeometry = new THREE.SphereGeometry(320, 64, 64);
+      const atmoMaterial = new THREE.ShaderMaterial({
+        uniforms: {
+          glowColor: { value: new THREE.Color(0xff8844) }
+        },
+        vertexShader: `
+          varying vec3 vNormal;
+          void main() {
+            vNormal = normalize(normalMatrix * normal);
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }
+        `,
+        fragmentShader: `
+          uniform vec3 glowColor;
+          varying vec3 vNormal;
+          
+          void main() {
+            float intensity = pow(0.5 - dot(vNormal, vec3(0, 0, 1.0)), 4.0);
+            vec3 glow = glowColor * intensity * 0.6;
+            gl_FragColor = vec4(glow, intensity * 0.5);
+          }
+        `,
+        side: THREE.BackSide,
+        blending: THREE.AdditiveBlending,
+        transparent: true,
+        depthWrite: false
+      });
+
+      const atmosphere = new THREE.Mesh(atmoGeometry, atmoMaterial);
+      atmosphere.position.copy(sun.position);
+      scene.add(atmosphere);
+
+      sunRef.current = { mesh: sun, glow: corona };
+      
+      // Store atmosphere reference for updates
+      (sun as any).atmosphere = atmosphere;
+    };
+
+    // ============================================
+    // STAR FIELD
     // ============================================
     const createStarField = () => {
       const starCount = Math.floor(8000 * particleMultiplier);
@@ -125,37 +413,30 @@ export default function WebGLBackground() {
 
       for (let i = 0; i < starCount; i++) {
         const i3 = i * 3;
-
-        // Stars distributed in a large sphere, but closer to camera
         const radius = 800 + Math.random() * 1200;
         const theta = Math.random() * Math.PI * 2;
         const phi = Math.acos(Math.random() * 2 - 1);
 
         positions[i3] = radius * Math.sin(phi) * Math.cos(theta);
         positions[i3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
-        positions[i3 + 2] = radius * Math.cos(phi) - 300; // Shift back
+        positions[i3 + 2] = radius * Math.cos(phi) - 300;
 
-        // Realistic star colors with more variety
         const colorChoice = Math.random();
         if (colorChoice > 0.97) {
-          // Blue-white stars (hot)
           colors[i3] = 0.6 + Math.random() * 0.2;
           colors[i3 + 1] = 0.7 + Math.random() * 0.2;
           colors[i3 + 2] = 1.0;
         } else if (colorChoice > 0.94) {
-          // Yellow-orange stars (warm)
           colors[i3] = 1.0;
           colors[i3 + 1] = 0.8 + Math.random() * 0.2;
           colors[i3 + 2] = 0.6 + Math.random() * 0.2;
         } else {
-          // White stars (most common)
           const brightness = 0.8 + Math.random() * 0.2;
           colors[i3] = brightness;
           colors[i3 + 1] = brightness;
           colors[i3 + 2] = brightness + Math.random() * 0.1;
         }
 
-        // Much larger stars for visibility
         sizes[i] = Math.random() * 8 + 3;
       }
 
@@ -179,7 +460,7 @@ export default function WebGLBackground() {
     };
 
     // ============================================
-    // PLANETS - Large and visible
+    // PLANETS
     // ============================================
     const createPlanets = () => {
       const planetData = [
@@ -292,7 +573,6 @@ export default function WebGLBackground() {
       ];
 
       planetData.forEach((data) => {
-        // Create planet
         const geometry = new THREE.SphereGeometry(data.size, 48, 48);
         const material = new THREE.MeshPhongMaterial({
           color: data.color,
@@ -305,7 +585,6 @@ export default function WebGLBackground() {
         const planet = new THREE.Mesh(geometry, material);
         planet.position.set(data.x, data.y, data.z);
 
-        // Add subtle surface detail
         planet.rotation.x = Math.random() * Math.PI;
         planet.rotation.z = Math.random() * Math.PI;
 
@@ -321,7 +600,6 @@ export default function WebGLBackground() {
           dataset: data.dataset,
         };
 
-        // Add ring if specified
         if (data.hasRing) {
           const ringGeometry = new THREE.RingGeometry(
             data.size * 1.5,
@@ -339,7 +617,6 @@ export default function WebGLBackground() {
           planet.add(ring);
         }
 
-        // Add moon if specified
         if (data.hasMoon) {
           const moonSize = data.size * 0.25;
           const moonGeometry = new THREE.SphereGeometry(moonSize, 24, 24);
@@ -375,14 +652,12 @@ export default function WebGLBackground() {
 
         const asteroid = new THREE.Mesh(geometry, material);
 
-        // Position in a belt around the scene
         const angle = Math.random() * Math.PI * 2;
         const radius = 400 + Math.random() * 300;
         asteroid.position.x = Math.cos(angle) * radius;
         asteroid.position.z = Math.sin(angle) * radius;
         asteroid.position.y = (Math.random() - 0.5) * 200;
 
-        // Random rotation
         asteroid.rotation.x = Math.random() * Math.PI * 2;
         asteroid.rotation.y = Math.random() * Math.PI * 2;
         asteroid.rotation.z = Math.random() * Math.PI * 2;
@@ -412,10 +687,8 @@ export default function WebGLBackground() {
       const spacecraftCount = Math.floor(8 * particleMultiplier);
 
       for (let i = 0; i < spacecraftCount; i++) {
-        // Create futuristic spacecraft geometry
         const geometry = new THREE.Group();
 
-        // Main body (elongated octahedron)
         const bodyGeometry = new THREE.OctahedronGeometry(15, 0);
         const bodyMaterial = new THREE.MeshPhongMaterial({
           color: i % 3 === 0 ? 0x4ECDC4 : i % 3 === 1 ? 0xFF9F1C : 0x95D600,
@@ -427,7 +700,6 @@ export default function WebGLBackground() {
         body.scale.set(1, 0.5, 2);
         geometry.add(body);
 
-        // Wings (two flat triangular prisms)
         const wingGeometry = new THREE.ConeGeometry(8, 20, 3);
         const wingMaterial = new THREE.MeshPhongMaterial({
           color: 0x555555,
@@ -445,7 +717,6 @@ export default function WebGLBackground() {
         rightWing.position.set(12, 0, 5);
         geometry.add(rightWing);
 
-        // Engine glow (small sphere at back)
         const engineGeometry = new THREE.SphereGeometry(4, 8, 8);
         const engineMaterial = new THREE.MeshBasicMaterial({
           color: 0x00ffff,
@@ -456,7 +727,6 @@ export default function WebGLBackground() {
         engine.position.set(0, 0, -25);
         geometry.add(engine);
 
-        // Random starting position across the scene
         const spacecraft = new THREE.Object3D();
         spacecraft.add(geometry);
 
@@ -464,7 +734,6 @@ export default function WebGLBackground() {
         spacecraft.position.y = (Math.random() - 0.5) * 800;
         spacecraft.position.z = (Math.random() - 0.5) * 1500;
 
-        // Random velocity direction
         const speed = 2 + Math.random() * 3;
         const direction = new THREE.Vector3(
           (Math.random() - 0.5),
@@ -474,7 +743,6 @@ export default function WebGLBackground() {
 
         const velocity = direction.multiplyScalar(speed);
 
-        // Random rotation speed
         const rotationSpeed = new THREE.Vector3(
           (Math.random() - 0.5) * 0.01,
           (Math.random() - 0.5) * 0.01,
@@ -491,18 +759,11 @@ export default function WebGLBackground() {
       }
     };
 
-    // Initialize scene
+    createSun();
     createStarField();
     createPlanets();
     createAsteroids();
     createSpacecraft();
-
-    console.log("WebGL Background initialized:", {
-      stars: starsRef.current ? "✓" : "✗",
-      planets: planetsRef.current.length,
-      asteroids: asteroidsRef.current.length,
-      spacecraft: spacecraftRef.current.length,
-    });
 
     // ============================================
     // SCROLL TRACKING
@@ -520,7 +781,6 @@ export default function WebGLBackground() {
       mouseRef.current.targetX = (event.clientX / window.innerWidth) * 2 - 1;
       mouseRef.current.targetY = -(event.clientY / window.innerHeight) * 2 + 1;
 
-      // Hover detection for planets
       const raycaster = new THREE.Raycaster();
       const mouse = new THREE.Vector2(
         mouseRef.current.targetX,
@@ -531,7 +791,6 @@ export default function WebGLBackground() {
       const planetMeshes = planetsRef.current.map((p) => p.mesh);
       const intersects = raycaster.intersectObjects(planetMeshes);
 
-      // Reset previous hovered planet
       if (hoveredPlanetRef.current) {
         const material = hoveredPlanetRef.current.material as THREE.MeshPhongMaterial;
         material.emissiveIntensity = 0.3;
@@ -541,7 +800,6 @@ export default function WebGLBackground() {
         }
       }
 
-      // Highlight new hovered planet
       if (intersects.length > 0) {
         const planet = intersects[0].object as THREE.Mesh;
         const material = planet.material as THREE.MeshPhongMaterial;
@@ -565,56 +823,82 @@ export default function WebGLBackground() {
 
       raycaster.setFromCamera(mouse, camera);
 
-      // Check if clicked on a planet
       const planetMeshes = planetsRef.current.map((p) => p.mesh);
       const intersects = raycaster.intersectObjects(planetMeshes);
+
+      // Always cleanup old CSS3D object first
+      if (cssObjectRef.current) {
+        scene.remove(cssObjectRef.current);
+        cssObjectRef.current = null;
+      }
+      if (metadataRootRef.current) {
+        metadataRootRef.current.unmount();
+        metadataRootRef.current = null;
+      }
+      selectedPlanetMeshRef.current = null;
 
       if (intersects.length > 0) {
         const clickedMesh = intersects[0].object as THREE.Mesh;
         const clickedPlanet = planetsRef.current.find((p) => p.mesh === clickedMesh);
 
         if (clickedPlanet) {
-          // Calculate 2D screen position from 3D world position
-          const vector = new THREE.Vector3();
-          clickedMesh.getWorldPosition(vector);
-          vector.project(camera);
-
-          const screenX = (vector.x * 0.5 + 0.5) * window.innerWidth;
-          const screenY = (-(vector.y * 0.5) + 0.5) * window.innerHeight;
-
-          // Calculate scale based on distance from camera
-          const distance = camera.position.distanceTo(clickedMesh.position);
-          const scale = Math.max(0.4, Math.min(1, 1000 / distance));
-
           selectedPlanetMeshRef.current = clickedMesh;
-          selectedPlanetDataRef.current = {
-            dataset: clickedPlanet.dataset,
-            screenPos: { x: screenX, y: screenY },
-            scale,
+
+          // Create CSS3D Object
+          const div = document.createElement('div');
+          // div.style.width = '320px';
+          // div.style.height = '400px';
+          div.style.pointerEvents = 'auto'; // Enable interactions
+
+          const root = createRoot(div);
+          metadataRootRef.current = root;
+
+          const handleClose = () => {
+            if (cssObjectRef.current) {
+              scene.remove(cssObjectRef.current);
+              cssObjectRef.current = null;
+            }
+            if (metadataRootRef.current) {
+              metadataRootRef.current.unmount();
+              metadataRootRef.current = null;
+            }
+            selectedPlanetMeshRef.current = null;
           };
-          setSelectedPlanet({
-            dataset: clickedPlanet.dataset,
-            screenPos: { x: screenX, y: screenY },
-            scale,
-          });
+
+          root.render(
+            <PlanetMetadataOverlay 
+              dataset={clickedPlanet.dataset}
+              screenPosition={null}
+              scale={1}
+              onClose={handleClose}
+              is3D={true}
+            />
+          );
+
+          const cssObject = new CSS3DObject(div);
+          
+          // Position near planet but slightly offset towards camera
+          const geometry = clickedMesh.geometry as THREE.SphereGeometry;
+          const offset = (geometry.parameters?.radius || 100) * 1.5 + 50;
+          cssObject.position.copy(clickedMesh.position);
+          cssObject.position.x += offset;
+          
+          // Initial rotation to face camera
+          cssObject.lookAt(camera.position);
+          
+          scene.add(cssObject);
+          cssObjectRef.current = cssObject;
         }
-      } else {
-        // Clicked empty space - close overlay
-        selectedPlanetMeshRef.current = null;
-        selectedPlanetDataRef.current = null;
-        setSelectedPlanet(null);
       }
     };
 
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("scroll", handleScroll, { passive: true });
 
-    // Only enable planet click interactions on home page
     if (isHomePage) {
       window.addEventListener("click", handleClick);
     }
 
-    // Initial scroll position
     handleScroll();
 
     // ============================================
@@ -639,7 +923,6 @@ export default function WebGLBackground() {
         const particle = new THREE.Mesh(geometry, material);
         particle.position.copy(position);
 
-        // Random explosion direction
         const velocity = new THREE.Vector3(
           (Math.random() - 0.5) * 8,
           (Math.random() - 0.5) * 8,
@@ -656,30 +939,26 @@ export default function WebGLBackground() {
         });
       }
 
-      // Animate explosion particles
       const animateExplosion = () => {
         let activeParticles = 0;
 
         particles.forEach((p) => {
           if (p.life < p.maxLife) {
             p.mesh.position.add(p.velocity);
-            p.velocity.multiplyScalar(0.95); // Deceleration
+            p.velocity.multiplyScalar(0.95);
             p.life++;
 
-            // Fade out
             const material = p.mesh.material as THREE.MeshBasicMaterial;
             material.opacity = 1 - p.life / p.maxLife;
 
             activeParticles++;
           } else if (p.mesh.parent) {
-            // Remove particle
             scene.remove(p.mesh);
             p.mesh.geometry.dispose();
             (p.mesh.material as THREE.Material).dispose();
           }
         });
 
-        // Continue animation if particles are still active
         if (activeParticles > 0) {
           requestAnimationFrame(animateExplosion);
         }
@@ -688,55 +967,72 @@ export default function WebGLBackground() {
       animateExplosion();
     };
 
-    // ============================================
-    // WINDOW RESIZE
-    // ============================================
     const handleResize = () => {
       if (!camera || !renderer) return;
 
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
+      
+      if (cssRendererRef.current) {
+        cssRendererRef.current.setSize(window.innerWidth, window.innerHeight);
+      }
     };
 
     window.addEventListener("resize", handleResize);
 
-    // ============================================
-    // ANIMATION LOOP
-    // ============================================
     let time = 0;
     const animate = () => {
       animationFrameRef.current = requestAnimationFrame(animate);
       time += 0.01;
 
-      // Smooth mouse parallax
+      // Update Sun Shader with realistic slow rotation
+      if (sunRef.current) {
+        const sunMaterial = sunRef.current.mesh.material as THREE.ShaderMaterial;
+        if (sunMaterial.uniforms) {
+          sunMaterial.uniforms.time.value = time;
+        }
+        
+        // Update Corona (glow) Shader
+        const coronaMaterial = sunRef.current.glow.material as THREE.ShaderMaterial;
+        if (coronaMaterial.uniforms) {
+          coronaMaterial.uniforms.time.value = time;
+        }
+        
+        // Update atmosphere if exists
+        const atmosphere = (sunRef.current.mesh as any).atmosphere;
+        if (atmosphere) {
+          const atmoMaterial = atmosphere.material as THREE.ShaderMaterial;
+          if (atmoMaterial.uniforms && atmoMaterial.uniforms.time) {
+            atmoMaterial.uniforms.time.value = time;
+          }
+        }
+        
+        // Very slow rotation for realistic effect
+        sunRef.current.mesh.rotation.y += 0.0005;
+        sunRef.current.mesh.rotation.x += 0.0002;
+      }
+
       mouseRef.current.x += (mouseRef.current.targetX - mouseRef.current.x) * 0.05;
       mouseRef.current.y += (mouseRef.current.targetY - mouseRef.current.y) * 0.05;
 
-      // Smooth scroll interpolation
       scrollRef.current.current += (scrollRef.current.target - scrollRef.current.current) * 0.05;
       const scrollInfluence = scrollRef.current.current;
 
-      // Camera journey through space based on scroll
-      // Move camera forward but stay further back for panoramic view
-      const scrollCameraZ = 800 - scrollInfluence * 800; // Moves from 800 to 0 (further back)
-      const scrollCameraY = scrollInfluence * 400 - 200; // Moves up and down (-200 to 200)
-      const scrollCameraX = Math.sin(scrollInfluence * Math.PI * 2) * 250; // Sways left-right
+      const scrollCameraZ = 800 - scrollInfluence * 800;
+      const scrollCameraY = scrollInfluence * 400 - 200;
+      const scrollCameraX = Math.sin(scrollInfluence * Math.PI * 2) * 250;
 
-      // Combine scroll-based position with mouse parallax
       camera.position.x = scrollCameraX + mouseRef.current.x * 50;
       camera.position.y = scrollCameraY + mouseRef.current.y * 50;
       camera.position.z = scrollCameraZ;
 
-      // Look at center of the scene
       camera.lookAt(0, 0, -300);
 
-      // Animate stars - slow rotation and twinkling
       if (starsRef.current) {
         starsRef.current.rotation.y += 0.00008;
         starsRef.current.rotation.x += 0.00003;
 
-        // Twinkling effect
         const starGeometry = starsRef.current.geometry;
         const sizes = starGeometry.attributes.size.array as Float32Array;
         for (let i = 0; i < sizes.length; i++) {
@@ -748,18 +1044,14 @@ export default function WebGLBackground() {
         starGeometry.attributes.size.needsUpdate = true;
       }
 
-      // Animate planets - simple rotation and orbit
       planetsRef.current.forEach((planet) => {
-        // Rotate on axis
         planet.mesh.rotation.y += planet.rotationSpeed;
         planet.mesh.rotation.x += planet.rotationSpeed * 0.1;
 
-        // Orbital motion
         planet.angle += planet.orbitSpeed;
         planet.mesh.position.x += Math.cos(planet.angle) * 0.2;
         planet.mesh.position.z += Math.sin(planet.angle) * 0.2;
 
-        // Animate moons
         if (planet.moons && planet.moons.length > 0) {
           planet.moons.forEach((moon, i) => {
             const moonAngle = time * 0.5 + i * Math.PI;
@@ -772,30 +1064,24 @@ export default function WebGLBackground() {
         }
       });
 
-      // Animate asteroids
       asteroidsRef.current.forEach((asteroid) => {
         asteroid.mesh.position.add(asteroid.velocity);
         asteroid.mesh.rotation.x += asteroid.rotationSpeed.x;
         asteroid.mesh.rotation.y += asteroid.rotationSpeed.y;
         asteroid.mesh.rotation.z += asteroid.rotationSpeed.z;
 
-        // Wrap around bounds
         if (Math.abs(asteroid.mesh.position.x) > 1000) asteroid.velocity.x *= -1;
         if (Math.abs(asteroid.mesh.position.y) > 1000) asteroid.velocity.y *= -1;
         if (Math.abs(asteroid.mesh.position.z) > 1000) asteroid.velocity.z *= -1;
       });
 
-      // Animate spacecraft
       spacecraftRef.current.forEach((spacecraft, i) => {
-        // Move spacecraft
         spacecraft.mesh.position.add(spacecraft.velocity);
 
-        // Apply rotation
         spacecraft.mesh.rotation.x += spacecraft.rotationSpeed.x;
         spacecraft.mesh.rotation.y += spacecraft.rotationSpeed.y;
         spacecraft.mesh.rotation.z += spacecraft.rotationSpeed.z;
 
-        // Orient spacecraft in direction of travel
         const direction = spacecraft.velocity.clone().normalize();
         const targetQuaternion = new THREE.Quaternion().setFromUnitVectors(
           new THREE.Vector3(0, 0, 1),
@@ -803,7 +1089,6 @@ export default function WebGLBackground() {
         );
         spacecraft.mesh.quaternion.slerp(targetQuaternion, 0.1);
 
-        // Wrap around bounds (respawn on opposite side)
         const bounds = 1200;
         if (spacecraft.mesh.position.x > bounds) spacecraft.mesh.position.x = -bounds;
         if (spacecraft.mesh.position.x < -bounds) spacecraft.mesh.position.x = bounds;
@@ -812,23 +1097,18 @@ export default function WebGLBackground() {
         if (spacecraft.mesh.position.z > bounds) spacecraft.mesh.position.z = -bounds;
         if (spacecraft.mesh.position.z < -bounds) spacecraft.mesh.position.z = bounds;
 
-        // Check collisions with other spacecraft
         for (let j = i + 1; j < spacecraftRef.current.length; j++) {
           const other = spacecraftRef.current[j];
           const distance = spacecraft.mesh.position.distanceTo(other.mesh.position);
 
-          // Collision threshold (sum of approximate radii)
           if (distance < 40) {
-            // Create explosion effect at collision point
             const explosionPos = spacecraft.mesh.position.clone().lerp(other.mesh.position, 0.5);
             createExplosion(explosionPos);
 
-            // Reflect velocities (simple collision response)
             const temp = spacecraft.velocity.clone();
             spacecraft.velocity.copy(other.velocity);
             other.velocity.copy(temp);
 
-            // Add some randomness to prevent stuck collisions
             spacecraft.velocity.add(
               new THREE.Vector3(
                 (Math.random() - 0.5) * 2,
@@ -844,7 +1124,6 @@ export default function WebGLBackground() {
               )
             );
 
-            // Move spacecraft apart to prevent continuous collision
             const separation = explosionPos.clone().sub(spacecraft.mesh.position).normalize();
             spacecraft.mesh.position.add(separation.multiplyScalar(-25));
             other.mesh.position.add(separation.multiplyScalar(25));
@@ -852,39 +1131,36 @@ export default function WebGLBackground() {
         }
       });
 
-      // Update selected planet metadata position to stick to planet
-      if (selectedPlanetMeshRef.current && selectedPlanetDataRef.current) {
-        const vector = new THREE.Vector3();
-        selectedPlanetMeshRef.current.getWorldPosition(vector);
-        vector.project(camera);
-
-        const screenX = (vector.x * 0.5 + 0.5) * window.innerWidth;
-        const screenY = (-(vector.y * 0.5) + 0.5) * window.innerHeight;
-
-        // Calculate scale based on distance from camera
-        const distance = camera.position.distanceTo(selectedPlanetMeshRef.current.position);
-        const scale = Math.max(0.4, Math.min(1, 1000 / distance));
-
-        // Update ref data every frame
-        selectedPlanetDataRef.current.screenPos = { x: screenX, y: screenY };
-        selectedPlanetDataRef.current.scale = scale;
-
-        // Trigger React update by setting new state object
-        setSelectedPlanet({
-          dataset: selectedPlanetDataRef.current.dataset,
-          screenPos: { x: screenX, y: screenY },
-          scale,
-        });
+      // Update CSS3D Object Position
+      if (cssObjectRef.current && selectedPlanetMeshRef.current) {
+        const planet = selectedPlanetMeshRef.current;
+        // Simply follow the planet exactly
+        // The offset is already applied when adding the object
+        // But we need to update it because the planet moves
+        const geometry = planet.geometry as THREE.SphereGeometry;
+        const offset = (geometry.parameters?.radius || 100) * 1.5 + 50;
+        
+        cssObjectRef.current.position.copy(planet.position);
+        // We can make it orbit or just stick to the side.
+        // Let's stick to the side but rotate with camera
+        // Or simpler: just stick to right side relative to camera?
+        // For now, just stick to world coordinates relative to planet
+        cssObjectRef.current.position.x += offset;
+        
+        // Make it face the camera so it's readable
+        cssObjectRef.current.lookAt(camera.position);
       }
 
       renderer.render(scene, camera);
+      
+      if (cssRendererRef.current) {
+        cssRendererRef.current.render(scene, camera);
+      }
     };
 
     animate();
 
-    // ============================================
-    // CLEANUP
-    // ============================================
+    // Cleanup
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
       if (isHomePage) {
@@ -928,37 +1204,57 @@ export default function WebGLBackground() {
         scene.remove(spacecraft.mesh);
       });
 
+      // Sun Cleanup (sun, corona, and atmosphere)
+      if (sunRef.current) {
+        // Clean sun mesh
+        sunRef.current.mesh.geometry.dispose();
+        (sunRef.current.mesh.material as THREE.Material).dispose();
+        scene.remove(sunRef.current.mesh);
+        
+        // Clean corona (glow)
+        sunRef.current.glow.geometry.dispose();
+        (sunRef.current.glow.material as THREE.Material).dispose();
+        scene.remove(sunRef.current.glow);
+        
+        // Clean atmosphere
+        const atmosphere = (sunRef.current.mesh as any).atmosphere;
+        if (atmosphere) {
+          atmosphere.geometry.dispose();
+          (atmosphere.material as THREE.Material).dispose();
+          scene.remove(atmosphere);
+        }
+      }
+
+      if (cssObjectRef.current) {
+        scene.remove(cssObjectRef.current);
+        cssObjectRef.current = null;
+      }
+      if (metadataRootRef.current) {
+        metadataRootRef.current.unmount();
+        metadataRootRef.current = null;
+      }
+
       if (renderer) {
         renderer.dispose();
         containerRef.current?.removeChild(renderer.domElement);
+      }
+      
+      if (cssRenderer) {
+        containerRef.current?.removeChild(cssRenderer.domElement);
       }
     };
   }, []);
 
   return (
-    <>
-      <div
-        ref={containerRef}
-        className="fixed top-0 left-0 w-full h-full"
-        style={{
-          zIndex: 0,
-          pointerEvents: 'none',
-          background: "radial-gradient(ellipse at center, #0f0f18 0%, #050508 50%, #000000 100%)",
-        }}
-      />
-      {/* Only show planet metadata overlay on home page */}
-      {isHomePage && (
-        <PlanetMetadataOverlay
-          dataset={selectedPlanet?.dataset || null}
-          screenPosition={selectedPlanet?.screenPos || null}
-          scale={selectedPlanet?.scale || 1}
-          onClose={() => {
-            selectedPlanetMeshRef.current = null;
-            selectedPlanetDataRef.current = null;
-            setSelectedPlanet(null);
-          }}
-        />
-      )}
-    </>
+    <div
+      ref={containerRef}
+      className="fixed top-0 left-0 w-full"
+      style={{
+        height: isHomePage ? 'calc(100vh + 500px)' : '100vh',
+        zIndex: 0,
+        pointerEvents: 'none',
+        background: "radial-gradient(ellipse at center, #0f0f18 0%, #050508 50%, #000000 100%)",
+      }}
+    />
   );
 }

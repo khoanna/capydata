@@ -49,7 +49,7 @@ const AssetCard = ({ asset }: AssetCardProps) => {
         {/* Header Row - Price & Sales */}
         <div className="flex items-start justify-between mb-3 relative z-10">
           <Badge variant={asset.price === 0 ? "success" : "price"} size="sm">
-            {formatPrice(asset.price)} {asset.price > 0 && "CAPY"}
+            {formatPrice(asset.price)} {asset.price > 0 && "SUI"}
           </Badge>
           
           <div className="flex items-center gap-1.5 px-2 py-1 bg-grass/10 rounded border border-grass/30">
