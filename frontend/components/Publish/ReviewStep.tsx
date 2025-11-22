@@ -1,7 +1,7 @@
 "use client";
 import { Calendar, Check, Coins, Database, FileText, Tag } from "lucide-react";
 import { PublishFormData } from "./PublishWizard";
-import { formatUSD, capyToUSD } from "@/lib/utils";
+import { formatUSD, suiToUSD, calculatePlatformFee } from "@/lib/utils";
 
 interface ReviewStepProps {
   formData: PublishFormData;
@@ -108,31 +108,41 @@ const ReviewStep = ({ formData }: ReviewStepProps) => {
             </p>
           </div>
           
-          {formData.pricingModel !== "free" && (
-            <>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="font-mono text-xs text-gray-400">Price</label>
-                  <p className="font-sans text-2xl font-bold text-yuzu mt-1">
-                    {formData.price} CAPY
-                  </p>
-                  <p className="font-mono text-xs text-gray-500">
-                    ≈ {formatUSD(capyToUSD(formData.price))}
-                  </p>
+          {formData.pricingModel !== "free" && (() => {
+            const feeInfo = calculatePlatformFee(formData.price);
+            return (
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="font-mono text-xs text-gray-400">Price</label>
+                    <p className="font-sans text-2xl font-bold text-yuzu mt-1">
+                      {formData.price} SUI
+                    </p>
+                    <p className="font-mono text-xs text-gray-500">
+                      ≈ {formatUSD(suiToUSD(formData.price))}
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="font-mono text-xs text-gray-400">You Receive</label>
+                    <p className="font-sans text-2xl font-bold text-white mt-1">
+                      {feeInfo.received.toFixed(4)} SUI
+                    </p>
+                    <p className="font-mono text-xs text-gray-500">
+                      After {feeInfo.feePercentage} platform fee
+                    </p>
+                  </div>
                 </div>
-                
-                <div>
-                  <label className="font-mono text-xs text-gray-400">You Receive</label>
-                  <p className="font-sans text-2xl font-bold text-white mt-1">
-                    {(formData.price * 0.97).toFixed(2)} CAPY
-                  </p>
-                  <p className="font-mono text-xs text-gray-500">
-                    After 3% platform fee
-                  </p>
-                </div>
-              </div>
-            </>
-          )}
+                {feeInfo.feeRate === 1.0 && (
+                  <div className="p-3 bg-amber-400/10 rounded border border-amber-400/30">
+                    <p className="font-mono text-xs text-amber-400">
+                      ⚠️ Note: Price ≤100 MIST — 100% platform fee applies. Consider pricing higher to receive payment.
+                    </p>
+                  </div>
+                )}
+              </>
+            );
+          })()}
         </div>
       </div>
 

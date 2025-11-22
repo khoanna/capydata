@@ -52,7 +52,7 @@ const Flow = () => {
                     </div>
                     <h3 className="text-2xl font-sans font-bold text-white mb-3 group-hover:text-grass transition-colors">Earn</h3>
                     <p className="font-mono text-xs text-gray-400 leading-relaxed pr-8">
-                        Get paid in CAPY instantly when users decrypt your blobs.
+                        Get paid in SUI instantly when users decrypt your blobs.
                     </p>
                 </div>
             </div>

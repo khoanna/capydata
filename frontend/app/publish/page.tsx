@@ -18,7 +18,7 @@ export default function PublishPage() {
             Publish Your Dataset
           </h1>
           <p className="font-mono text-sm text-gray-400 max-w-2xl mx-auto">
-            List your data on CapyData marketplace. Earn CAPY tokens while
+            List your data on CapyData marketplace. Earn SUI tokens while
             maintaining full control and privacy with Seal protocol encryption.
           </p>
         </div>

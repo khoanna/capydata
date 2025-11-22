@@ -12,7 +12,7 @@ export const truncateAddress = (address: string, chars = 4): string => {
 // Format price with token symbol
 export const formatPrice = (
   amount: number,
-  token: string = "CAPY",
+  token: string = "SUI",
   decimals: number = 2
 ): string => {
   return `${amount.toLocaleString(undefined, {
@@ -21,10 +21,10 @@ export const formatPrice = (
   })} ${token}`;
 };
 
-// Convert CAPY to USD (mock exchange rate)
-export const capyToUSD = (capy: number): number => {
-  const CAPY_USD_RATE = 1.337; // Mock rate
-  return capy * CAPY_USD_RATE;
+// Convert SUI to USD (mock exchange rate)
+export const suiToUSD = (sui: number): number => {
+  const SUI_USD_RATE = 4.50; // Mock rate
+  return sui * SUI_USD_RATE;
 };
 
 // Format USD
@@ -137,3 +137,31 @@ export const suiToMist = (sui: number): number => {
 export const mistToSui = (mist: number): number => {
   return mist / 1_000_000_000;
 }
+
+// Calculate platform fee based on tiered structure
+// If price <= 100 MIST: 100% fee
+// If price > 100 MIST: 1% fee
+export const calculatePlatformFee = (priceInSui: number): {
+  feeRate: number;
+  feeAmount: number;
+  received: number;
+  feePercentage: string;
+} => {
+  const priceInMist = suiToMist(priceInSui);
+
+  if (priceInMist <= 100) {
+    return {
+      feeRate: 1.0,
+      feeAmount: priceInSui,
+      received: 0,
+      feePercentage: "100%",
+    };
+  }
+
+  return {
+    feeRate: 0.01,
+    feeAmount: priceInSui * 0.01,
+    received: priceInSui * 0.99,
+    feePercentage: "1%",
+  };
+};

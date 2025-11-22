@@ -3,14 +3,13 @@ import { Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
 import Navbar from "@/components/Navbar";
-import FooterSlide from "@/components/FooterSlide";
 import Script from "next/script";
 import CustomAnimations from "@/components/CustomAnimation";
-import Footer from "@/components/Footer";
 import ToastProvider from "@/components/Global/Toast/ToastProvider";
 import SuiProvider from "@/components/Global/Web3/SuiProvider";
 import WebGLBackground from "@/components/Background/WebGLBackground";
 import { AppContextProvider } from "@/context/AppContext";
+import LayoutFooter from "@/components/LayoutFooter";
 
 const space = Space_Grotesk({
   subsets: ["latin"],
@@ -47,8 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <CustomAnimations />
                 <Navbar />
                 {children}
-                <Footer />
-                <FooterSlide />
+                <LayoutFooter />
               </ToastProvider>
             </div>
           </AppContextProvider>

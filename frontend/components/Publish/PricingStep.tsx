@@ -1,10 +1,11 @@
 "use client";
 import { Check, Coins, DollarSign, Gift, Info, Sparkles, Tag, TrendingUp } from "lucide-react";
+import { useState, useEffect } from "react";
 
 import { PublishFormData } from "./PublishWizard";
 import { Input } from "@/components/Common/Input";
 import CustomSelect from "@/components/Common/CustomSelect";
-import { capyToUSD, formatUSD } from "@/lib/utils";
+import { suiToUSD, formatUSD, calculatePlatformFee } from "@/lib/utils";
 
 interface PricingStepProps {
   formData: PublishFormData;
@@ -12,6 +13,10 @@ interface PricingStepProps {
 }
 
 const PricingStep = ({ formData, updateFormData }: PricingStepProps) => {
+  // Keep input value as string to preserve user input like "0.", "0.1", etc.
+  const [priceInput, setPriceInput] = useState<string>(
+    formData.price > 0 ? formData.price.toString() : ""
+  );
   const pricingModels = [
     {
       value: "free" as const,
@@ -25,7 +30,7 @@ const PricingStep = ({ formData, updateFormData }: PricingStepProps) => {
       icon: <Tag className="w-6 h-6" />,
       label: "Fixed Price",
       description: "Set a one-time purchase price",
-      details: "Buyers pay a fixed amount of CAPY tokens for permanent access.",
+      details: "Buyers pay a fixed amount of SUI tokens for permanent access.",
     },
     // {
     //   value: "dynamic" as const,
@@ -48,8 +53,20 @@ const PricingStep = ({ formData, updateFormData }: PricingStepProps) => {
   ];
 
   const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(e.target.value);
-    updateFormData({ price: isNaN(value) ? 0 : value });
+    const inputValue = e.target.value;
+
+    // Just allow normal number input (digits and one decimal point)
+    if (inputValue === "" || /^\d*\.?\d*$/.test(inputValue)) {
+      setPriceInput(inputValue);
+
+      // Only update formData.price if we have a valid number, otherwise keep previous value
+      const numValue = parseFloat(inputValue);
+      if (!isNaN(numValue) && numValue > 0) {
+        updateFormData({ price: numValue });
+      } else if (inputValue === "") {
+        updateFormData({ price: 0 });
+      }
+    }
   };
 
   return (
@@ -112,44 +129,56 @@ const PricingStep = ({ formData, updateFormData }: PricingStepProps) => {
 
           <div className="space-y-4">
             <Input
-              label="Price (CAPY) *"
-              type="number"
-              placeholder="50"
-              value={formData.price || ""}
+              label="Price (SUI) *"
+              type="text"
+              inputMode="decimal"
+              placeholder="0.1"
+              value={priceInput}
               onChange={handlePriceChange}
               hint={
                 formData.price > 0
-                  ? `≈ ${formatUSD(capyToUSD(formData.price))}`
-                  : "Enter amount in CAPY tokens"
+                  ? `≈ ${formatUSD(suiToUSD(formData.price))}`
+                  : "Enter amount in SUI tokens (e.g., 0.1, 5.25, 100)"
               }
               icon={<DollarSign className="w-4 h-4" />}
             />
 
             {/* Price Breakdown */}
-            {formData.price > 0 && (
-              <div className="p-4 glass-input rounded-lg space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-xs text-gray-400">You receive</span>
-                  <span className="font-mono text-sm text-white font-bold">
-                    {(formData.price * 0.97).toFixed(2)} CAPY
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-xs text-gray-400">Platform fee (3%)</span>
-                  <span className="font-mono text-sm text-gray-400">
-                    {(formData.price * 0.03).toFixed(2)} CAPY
-                  </span>
-                </div>
-                <div className="pt-2 border-t border-white/10">
+            {formData.price > 0 && (() => {
+              const feeInfo = calculatePlatformFee(formData.price);
+              return (
+                <div className="p-4 glass-input rounded-lg space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="font-mono text-sm text-white font-bold">Buyer pays</span>
-                    <span className="font-mono text-lg text-yuzu font-bold">
-                      {formData.price} CAPY
+                    <span className="font-mono text-xs text-gray-400">You receive</span>
+                    <span className="font-mono text-sm text-white font-bold">
+                      {feeInfo.received.toFixed(4)} SUI
                     </span>
                   </div>
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-xs text-gray-400">
+                      Platform fee ({feeInfo.feePercentage})
+                    </span>
+                    <span className="font-mono text-sm text-gray-400">
+                      {feeInfo.feeAmount.toFixed(4)} SUI
+                    </span>
+                  </div>
+                  {feeInfo.feeRate === 1.0 && (
+                    <div className="flex items-center gap-1 text-xs text-amber-400 bg-amber-400/10 p-2 rounded border border-amber-400/30">
+                      <Info className="w-3 h-3" />
+                      <span className="font-mono">Price ≤100 MIST: 100% platform fee applies</span>
+                    </div>
+                  )}
+                  <div className="pt-2 border-t border-white/10">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-sm text-white font-bold">Buyer pays</span>
+                      <span className="font-mono text-lg text-yuzu font-bold">
+                        {formData.price} SUI
+                      </span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            )}
+              );
+            })()}
           </div>
         </div>
       )}
@@ -222,9 +251,9 @@ const PricingStep = ({ formData, updateFormData }: PricingStepProps) => {
           </div>
           <div className="grid grid-cols-3 gap-4">
             {[
-              { label: "10 sales", value: formData.price * 10 * 0.97 },
-              { label: "50 sales", value: formData.price * 50 * 0.97 },
-              { label: "100 sales", value: formData.price * 100 * 0.97 },
+              { label: "10 sales", value: calculatePlatformFee(formData.price).received * 10 },
+              { label: "50 sales", value: calculatePlatformFee(formData.price).received * 50 },
+              { label: "100 sales", value: calculatePlatformFee(formData.price).received * 100 },
             ].map((projection, i) => (
               <div key={i} className="text-center">
                 <p className="font-mono text-xs text-gray-400 mb-1">
@@ -234,7 +263,7 @@ const PricingStep = ({ formData, updateFormData }: PricingStepProps) => {
                   {projection.value.toFixed(0)}
                 </p>
                 <p className="font-mono text-[10px] text-gray-500">
-                  {formatUSD(capyToUSD(projection.value))}
+                  {formatUSD(suiToUSD(projection.value))}
                 </p>
               </div>
             ))}

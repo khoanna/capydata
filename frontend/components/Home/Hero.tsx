@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 const Hero = () => {
   return (
@@ -28,13 +29,21 @@ const Hero = () => {
             </p>
 
             <div className="flex flex-wrap gap-4 pt-4 reveal delay-300">
-              <button className="bg-yuzu text-black px-8 py-4 rounded-lg font-bold font-mono text-sm hover:bg-white hover:scale-105 transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(255,159,28,0.4)]">
+            
+              <Link 
+                href="/marketplace"
+                className="bg-yuzu text-black px-8 py-4 rounded-lg font-bold font-mono text-sm hover:bg-white hover:scale-105 transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(255,159,28,0.4)]"
+              >
                 BROWSE DATASETS{" "}
                 <ArrowRight className="w-4 h-4" />
-              </button>
-              <button className="px-8 py-4 border border-white/20 rounded-lg font-mono text-sm hover:border-hydro hover:text-hydro transition-colors bg-black/40 backdrop-blur-sm">
+              </Link>
+
+              <Link 
+                href="/publish"
+                className="px-8 py-4 border border-white/20 rounded-lg font-mono text-sm hover:border-hydro hover:text-hydro transition-colors bg-black/40 backdrop-blur-sm inline-flex items-center justify-center"
+              >
                 LIST YOUR DATA
-              </button>
+              </Link>
             </div>
 
             <div className="flex items-center gap-4 pt-4 opacity-60 reveal delay-500">
@@ -61,7 +70,7 @@ const Hero = () => {
               <div className="relative w-full h-full rounded-3xl overflow-hidden border-4 border-yuzu/50 shadow-[0_0_60px_rgba(255,159,28,0.3)] animate-float group
                 hover:border-yuzu hover:border-[6px] hover:shadow-[0_0_120px_rgba(255,159,28,0.8),0_0_200px_rgba(78,205,196,0.5),0_0_280px_rgba(149,214,0,0.3)]
                 hover:scale-[1.08] hover:-translate-y-3 hover:rotate-[0.5deg] hover:animate-[rainbow-glow_3s_ease-in-out_infinite]
-                transition-all duration-[800ms] ease-[cubic-bezier(0.23,1,0.32,1)]
+                transition-all duration-[800] ease-[cubic-bezier(0.23,1,0.32,1)]
                 will-change-transform origin-center">
 
                 <Image
@@ -125,7 +134,7 @@ const Hero = () => {
                 <div className="absolute bottom-4 left-4 z-40 font-mono text-[10px] text-yuzu bg-black/80 px-3 py-1 rounded border border-yuzu/30 backdrop-blur-md
                   transition-all duration-[600ms] ease-[cubic-bezier(0.23,1,0.32,1)]
                   group-hover:bg-yuzu/20 group-hover:border-yuzu group-hover:shadow-[0_0_20px_rgba(255,159,28,0.5)]">
-                  &gt; SUBJECT: CAPY_01
+                  &gt; SUBJECT: SUI_01
                   <br />
                   &gt; CHILL_FACTOR: <span className="transition-all duration-[400ms] group-hover:text-white group-hover:font-extrabold">MAX</span>
                 </div>

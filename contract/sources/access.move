@@ -1,5 +1,5 @@
 module contract::access {
-
+    
     use contract::marketplace::{Dataset, Marketplace};
     use sui::coin::Coin;
     use sui::sui::SUI;
@@ -7,6 +7,8 @@ module contract::access {
     use sui::transfer::public_transfer;
     use sui::event::emit;
     use sui::clock::Clock;
+
+    
 
     // Fee rate in basis points (1 basis point = 0.01%)
     // 100 basis points = 1%

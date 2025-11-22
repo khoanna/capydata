@@ -53,7 +53,7 @@ const MarketplaceFilters = ({
           onClick={() => toggleSection("price")}
           className="w-full flex items-center justify-between mb-3 font-mono text-xs text-gray-400 hover:text-yuzu transition-colors"
         >
-          <span className="tracking-widest">PRICE (CAPY)</span>
+          <span className="tracking-widest">PRICE (SUI)</span>
           {expandedSections.price ? (
             <ChevronUp className="w-4 h-4 transition-transform" />
           ) : (

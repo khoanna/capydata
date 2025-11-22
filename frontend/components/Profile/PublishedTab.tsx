@@ -1,5 +1,5 @@
 "use client";
-import { ArrowRight, BarChart, Inbox, Trophy, UploadCloud } from "lucide-react";
+import { ArrowRight, BarChart, Inbox, Trophy, UploadCloud, Edit } from "lucide-react";
 
 import { useState } from "react";
 import AssetCard from "@/components/Marketplace/AssetCard";
@@ -7,6 +7,11 @@ import Button from "@/components/Common/Button";
 import Link from "next/link";
 import { useAppContext } from "@/context/AppContext";
 import { useCurrentAccount } from "@mysten/dapp-kit";
+import Modal from "@/components/Common/Modal";
+import { Input, TextArea } from "@/components/Common/Input";
+import useProfile from "@/hooks/useProfile";
+import { useToast } from "@/hooks/useToast";
+import { Asset } from "@/type/Item";
 
 interface PublishedTabProps {
   address: string;
@@ -14,8 +19,13 @@ interface PublishedTabProps {
 
 const PublishedTab = ({ address }: PublishedTabProps) => {
   const [sortBy, setSortBy] = useState<"recent" | "popular" | "revenue">("recent");
-  const { allListings } = useAppContext();
+  const { allListings, fetchListings } = useAppContext();
   const currentAccount = useCurrentAccount();
+  const { setTitle, setDescription, setPrice, loading } = useProfile();
+  const { showToast } = useToast();
+
+  const [editingAsset, setEditingAsset] = useState<Asset | null>(null);
+  const [editForm, setEditForm] = useState({ title: "", description: "", price: "" });
 
   // Filter assets published by this address
   const publishedAssets = allListings?.filter(asset => asset.owner === address) || [];
@@ -29,6 +39,44 @@ const PublishedTab = ({ address }: PublishedTabProps) => {
     if (sortBy === "revenue") return b.price * b.amount_sold - a.price * a.amount_sold;
     return 0;
   });
+
+  const handleEditClick = (asset: Asset) => {
+    setEditingAsset(asset);
+    setEditForm({
+      title: asset.title,
+      description: asset.description,
+      price: asset.price.toString()
+    });
+  };
+
+  const handleSave = async () => {
+    if (!editingAsset) return;
+    try {
+      let updated = false;
+      if (editForm.title !== editingAsset.title) {
+        await setTitle(editingAsset.id.id, editForm.title);
+        updated = true;
+      }
+      if (editForm.description !== editingAsset.description) {
+        await setDescription(editingAsset.id.id, editForm.description);
+        updated = true;
+      }
+      const newPrice = Number(editForm.price);
+      if (!isNaN(newPrice) && newPrice !== editingAsset.price) {
+         await setPrice(editingAsset.id.id, newPrice);
+         updated = true;
+      }
+
+      if (updated) {
+        showToast({ type: "success", message: "Dataset updated successfully" });
+        await fetchListings();
+      }
+      setEditingAsset(null);
+    } catch (error) {
+      console.error(error);
+      showToast({ type: "error", message: "Failed to update dataset" });
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -59,8 +107,21 @@ const PublishedTab = ({ address }: PublishedTabProps) => {
       {publishedAssets.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {sortedAssets.map((asset, index) => (
-            <div key={asset.id.id} className="reveal" style={{ animationDelay: `${index * 100}ms` }}>
+            <div key={asset.id.id} className="reveal relative group/edit" style={{ animationDelay: `${index * 100}ms` }}>
               <AssetCard asset={asset} />
+              {isOwnProfile && (
+                <button 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleEditClick(asset);
+                  }}
+                  className="absolute top-3 right-3 z-20 p-2 bg-panel/80 hover:bg-yuzu backdrop-blur-md text-white hover:text-black rounded-full opacity-0 group-hover/edit:opacity-100 transition-all shadow-lg transform translate-y-2 group-hover/edit:translate-y-0"
+                  title="Edit Dataset"
+                >
+                  <Edit className="w-4 h-4" />
+                </button>
+              )}
             </div>
           ))}
         </div>
@@ -98,7 +159,9 @@ const PublishedTab = ({ address }: PublishedTabProps) => {
             <div className="p-4 glass-input rounded-lg">
               <p className="font-mono text-xs text-gray-400 mb-1">Total Sales</p>
               <p className="font-sans text-2xl font-bold text-white">
-                {publishedAssets.reduce((sum, asset) => sum + asset.amount_sold, 0)}
+                {publishedAssets
+                  .reduce((sum, asset) => sum + Number(asset.amount_sold), 0)
+                  .toLocaleString()}
               </p>
             </div>
             <div className="p-4 glass-input rounded-lg">
@@ -107,7 +170,7 @@ const PublishedTab = ({ address }: PublishedTabProps) => {
                 {publishedAssets
                   .reduce((sum, asset) => sum + asset.price * asset.amount_sold, 0)
                   .toLocaleString()}
-                <span className="text-sm ml-1">CAPY</span>
+                <span className="text-sm ml-1">SUI</span>
               </p>
             </div>
             <div className="p-4 glass-input rounded-lg">
@@ -116,8 +179,8 @@ const PublishedTab = ({ address }: PublishedTabProps) => {
                 {(
                   publishedAssets.reduce((sum, asset) => sum + asset.price, 0) /
                   publishedAssets.length
-                ).toFixed(0)}
-                <span className="text-sm ml-1">CAPY</span>
+                ).toFixed(5)}
+                <span className="text-sm ml-1">SUI</span>
               </p>
             </div>
             <div className="p-4 glass-input rounded-lg">
@@ -143,7 +206,7 @@ const PublishedTab = ({ address }: PublishedTabProps) => {
                 {sortedAssets[0].title}
               </p>
               <p className="font-mono text-xs text-gray-400">
-                {sortedAssets[0].amount_sold} sales • {sortedAssets[0].price * sortedAssets[0].amount_sold} CAPY revenue
+                {sortedAssets[0].amount_sold} sales • {sortedAssets[0].price * sortedAssets[0].amount_sold} SUI revenue
               </p>
             </div>
             <Link href={`/item/${sortedAssets[0].id.id}`}>
@@ -155,6 +218,48 @@ const PublishedTab = ({ address }: PublishedTabProps) => {
           </div>
         </div>
       )}
+
+      {/* Edit Modal */}
+      <Modal 
+        isOpen={!!editingAsset} 
+        onClose={() => setEditingAsset(null)}
+        title="Edit Dataset"
+      >
+        <div className="space-y-6">
+          <Input 
+            label="Title" 
+            value={editForm.title} 
+            onChange={(e) => setEditForm({...editForm, title: e.target.value})} 
+            placeholder="Dataset Title"
+          />
+          
+          <TextArea
+            label="Description"
+            value={editForm.description}
+            onChange={(e) => setEditForm({...editForm, description: e.target.value})}
+            placeholder="Describe your dataset..."
+          />
+          
+          <Input 
+            label="Price (SUI)" 
+            type="number"
+            step="0.000000001"
+            value={editForm.price} 
+            onChange={(e) => setEditForm({...editForm, price: e.target.value})} 
+            placeholder="0.0"
+            hint="Set price to 0 for free access"
+          />
+          
+          <div className="flex justify-end gap-3 pt-4">
+            <Button variant="ghost" onClick={() => setEditingAsset(null)} disabled={loading}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={handleSave} isLoading={loading}>
+              Save Changes
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

@@ -32,12 +32,12 @@ const { networkConfig, useNetworkVariable, useNetworkVariables } =
 
 export { networkConfig, useNetworkVariable, useNetworkVariables };
 
-// CAPY Token configuration (mock - replace with actual token details)
-export const CAPY_TOKEN = {
-  symbol: "CAPY",
+// SUI Token configuration
+export const SUI_TOKEN = {
+  symbol: "SUI",
   decimals: 9,
-  // This would be the actual token object ID on Sui
-  coinType: "0x1234::capy::CAPY", // Mock coin type
+  // Native SUI token type
+  coinType: "0x2::sui::SUI",
 };
 
 // Helper to format SUI amount
