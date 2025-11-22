@@ -16,7 +16,7 @@ CapyData is designed for Web3-native AI and data workflows: client-side SEAL enc
 - Marketplace listing & buying: list datasets, set prices, and buy datasets using Sui transactions and the on-chain marketplace contract.
 - Secure decryption pipeline: decrypt only after on-chain approval (seal_approve) and verified session key signing.
 
-## Architecture (high-level)
+## Architecture
 
 Frontend (Next.js + TypeScript)
 	└─ encrypt(file) (SEAL client) → encryptedObject
