@@ -4,7 +4,7 @@ CapyData is a decentralized marketplace for datasets built on the Sui blockchain
 
 CapyData is designed for Web3-native AI and data workflows: client-side SEAL encryption, Walrus decentralized storage, Move-based dataset NFTs for access control, and a trusted session approval flow for secure decryption.
 
-## Features
+## ⚡ Features
 
 - Client-side SEAL encryption: files are encrypted in the browser before leaving the user’s machine so raw data never touches the network in plaintext.
 - Walrus decentralized storage: encrypted blobs are stored with Walrus for scalable, decentralized retrieval and content addressing.
@@ -14,7 +14,7 @@ CapyData is designed for Web3-native AI and data workflows: client-side SEAL enc
 - Marketplace listing & buying: list datasets, set prices, and buy datasets using Sui transactions and the on-chain marketplace contract.
 - Secure decryption pipeline: decrypt only after on-chain approval (seal_approve) and verified session key signing.
 
-## Architecture
+## 🏗️ Architecture
 
 ```
 Frontend (Next.js + TypeScript)
@@ -29,7 +29,7 @@ Buyer
 	└─ decrypt(encryptedObject) → access plaintext locally
 ```
 
-## Data Flow
+## 🔁 Data Flow
 
 ```
 [User Browser] --(encrypt via Seal)--> [Encrypted Object]
@@ -45,7 +45,7 @@ Buyer
 			 |--(decrypt locally)--> [Plaintext File]
 ```
 
-## Tech Stack
+## 🧰 Tech Stack
 
 - Frontend: Next.js (App Router) + TypeScript
 - Blockchain: Sui (Move smart contracts)
@@ -54,7 +54,7 @@ Buyer
 - Wallet/Signing: @mysten/dapp-kit (Sui wallet adapters)
 - Tooling: pnpm, ESLint, Prettier
 
-## Smart Contracts (overview)
+## 📜 Smart Contracts
 
 The Move modules define the on-chain data model for datasets, marketplace, and NFTs. Key structs and concepts:
 
@@ -80,7 +80,7 @@ The Move modules define the on-chain data model for datasets, marketplace, and N
 
 > Note: See `contract/sources/marketplace.move` and `contract/sources/access.move` for exact field names and function signatures.
 
-## Installation & Setup
+## 🛠️ Installation & Setup
 
 Requirements
 - Node.js (16+), pnpm
@@ -126,7 +126,7 @@ pnpm --filter frontend dev
 
 This starts the Next.js app (default: http://localhost:3000).
 
-## Usage Guide (end-user flow)
+## 📝 Usage Guide (end-user flow)
 
 1. Uploading a dataset (Publisher)
 	 - On the Publish page, select a file and fill metadata (title, description, tags).
@@ -150,7 +150,7 @@ This starts the Next.js app (default: http://localhost:3000).
 	 - The client constructs a `seal_approve` transaction (targeting `access::seal_approve`) that references the dataset and the buyer's NFT. The buyer signs a personal message to prove control of the wallet.
 	 - The Seal server/session uses the built transaction bytes to verify the on-chain approval. When verified, `sealClient.decrypt()` returns plaintext bytes that are only available to the client.
 
-## Move Modules & Major Entry Functions
+## 🧩 Move Modules & Major Entry Functions
 
 - `create_dataset` (if present): create a Dataset object (owner, metadata, blob_id)
 - `list_dataset`: add dataset to marketplace listing and set price
@@ -160,7 +160,7 @@ This starts the Next.js app (default: http://localhost:3000).
 
 Refer to `contract/sources/*.move` for the exact function signatures.
 
-## Contributing
+## 🤝 Contributing
 
 We welcome contributions! Please follow this workflow:
 
@@ -171,7 +171,7 @@ We welcome contributions! Please follow this workflow:
 
 Please respect the code style and add tests for significant behavior changes.
 
-## License
+## 📄 License
 
 This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
 
