@@ -1,5 +1,5 @@
 "use client";
-import { ArrowRight, BarChart, Inbox, Trophy, UploadCloud, Edit } from "lucide-react";
+import { ArrowRight, Inbox, Trophy, UploadCloud } from "lucide-react";
 
 import { useState } from "react";
 import AssetCard from "@/components/Marketplace/AssetCard";
@@ -187,50 +187,7 @@ const PublishedTab = ({ address }: PublishedTabProps) => {
         </div>
       )}
 
-      {/* Quick Stats for Published Assets */}
-      {publishedAssets.length > 0 && (
-        <div className="glass-card p-6 rounded-lg">
-          <h3 className="font-sans font-bold text-white mb-4 flex items-center gap-2">
-            <BarChart className="w-5 h-5 text-yuzu" />
-            Publishing Overview
-          </h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="p-4 glass-input rounded-lg">
-              <p className="font-mono text-xs text-gray-400 mb-1">Total Sales</p>
-              <p className="font-sans text-2xl font-bold text-white">
-                {publishedAssets
-                  .reduce((sum, asset) => sum + Number(asset.amount_sold), 0)
-                  .toLocaleString()}
-              </p>
-            </div>
-            <div className="p-4 glass-input rounded-lg">
-              <p className="font-mono text-xs text-gray-400 mb-1">Total Revenue</p>
-              <p className="font-sans text-2xl font-bold text-yuzu">
-                {publishedAssets
-                  .reduce((sum, asset) => sum + asset.price * asset.amount_sold, 0)
-                  .toLocaleString()}
-                <span className="text-sm ml-1">SUI</span>
-              </p>
-            </div>
-            <div className="p-4 glass-input rounded-lg">
-              <p className="font-mono text-xs text-gray-400 mb-1">Avg Price</p>
-              <p className="font-sans text-2xl font-bold text-hydro">
-                {(
-                  publishedAssets.reduce((sum, asset) => sum + asset.price, 0) /
-                  publishedAssets.length
-                ).toFixed(5)}
-                <span className="text-sm ml-1">SUI</span>
-              </p>
-            </div>
-            <div className="p-4 glass-input rounded-lg">
-              <p className="font-mono text-xs text-gray-400 mb-1">Active Listings</p>
-              <p className="font-sans text-2xl font-bold text-grass">
-                {publishedAssets.length}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Publishing overview moved to IdentityHeader */}
 
       {/* Top Performing Dataset */}
       {publishedAssets.length > 0 && (

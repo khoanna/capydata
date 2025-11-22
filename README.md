@@ -74,7 +74,7 @@ The Move modules define the on-chain data model for datasets, marketplace, and N
 	- id: UID
 	- dataset_id: ID — dataset the NFT grants access to
 
-- seal_approve(dataset: &Dataset, nft: &NFT)
+- seal_approve (dataset: &Dataset, nft: &NFT)
 	- Verifies nft.dataset_id equals object::id(dataset)
 	- Called in the client flow via a signed transaction to approve SEAL decryption
 
