@@ -37,8 +37,6 @@ export const AppContextProvider = ({children}: {children: React.ReactNode}) => {
   const fetchUserDatasets = async () => {
     if (currentAccount?.address) {
       const datasets = await getUserDatasets();
-      console.log(datasets);
-      
       setUserDatasets(datasets);
     }
   };

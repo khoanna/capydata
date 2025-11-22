@@ -36,7 +36,7 @@ export default function MarketplacePage() {
   const filteredAssets = useMemo(() => {
     if (!allListings) return [];
 
-    let assets: Asset[] = [...allListings];
+    let assets: Asset[] = allListings.filter((asset: Asset) => asset.on_listed);  
 
     // Filter by search query
     if (searchQuery) {

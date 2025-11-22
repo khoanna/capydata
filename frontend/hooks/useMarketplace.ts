@@ -251,6 +251,66 @@ export default function useMarketplace() {
     return datasetIds as unknown as string[];
   };
 
+  const delist = async (datasetId: string) => {
+    setLoading(true);
+    try {
+      const tx = new Transaction();
+      tx.moveCall({
+        target: `${PACKAGE_ID}::marketplace::delist_dataset`,
+        typeArguments: [],
+        arguments: [
+          tx.pure.string(datasetId),
+          tx.object(MARKETPLACE_ID),
+        ],
+      });
+
+      const result = await signAndExecuteTransaction({
+        transaction: tx,
+      });
+
+      await client.waitForTransaction({
+        digest: result.digest,
+      });
+
+      return result;
+    } catch (error) {
+      console.error("Delist dataset error:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const relist = async (datasetId: string) => {
+    setLoading(true);
+    try {
+      const tx = new Transaction();
+      tx.moveCall({
+        target: `${PACKAGE_ID}::marketplace::relist_dataset`,
+        typeArguments: [],
+        arguments: [
+          tx.pure.string(datasetId),
+          tx.object(MARKETPLACE_ID),
+        ],
+      });
+
+      const result = await signAndExecuteTransaction({
+        transaction: tx,
+      });
+
+      await client.waitForTransaction({
+        digest: result.digest,
+      });
+
+      return result;
+    } catch (error) {
+      console.error("Relist dataset error:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return {
     loading,
     uploadFile,
@@ -258,6 +318,8 @@ export default function useMarketplace() {
     getAllListings,
     buyDataset,
     getUserDatasets,
+    delist,
+    relist,
     isReady,
   };
 }

@@ -77,7 +77,7 @@ const PublishedTab = ({ address }: PublishedTabProps) => {
             }
           </p>
           {isOwnProfile && (
-            <Link href="/publish">
+            <Link href="/publish" className="flex items-center justify-center">
               <Button variant="primary" size="lg">
                 <UploadCloud className="w-5 h-5" />
                 Publish Dataset
