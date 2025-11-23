@@ -169,12 +169,6 @@ We welcome contributions! Please follow this workflow:
 3. Run tests & lint locally
 4. Open a pull request describing the changes
 
-Please respect the code style and add tests for significant behavior changes.
-
-## 📄 License
-
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
-
 ---
 
 If you'd like, I can also add a small `README` badge, deployment instructions (Vercel), or a quickstart script that seeds the marketplace with a test dataset.
