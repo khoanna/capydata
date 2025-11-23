@@ -10,7 +10,7 @@ const Footer = ({ transparent = false }: FooterProps) => {
   return (
     <footer className={`${transparent ? "bg-transparent border-t-transparent" : "bg-void border-t border-white/10"} pt-24 pb-12 relative`}>
       <div className="max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-12 mb-16">
           <div className="md:col-span-2">
             <div className="flex items-center gap-3 mb-6">
               <Image
@@ -30,6 +30,7 @@ const Footer = ({ transparent = false }: FooterProps) => {
           </div>
           <div>
             <h4 className="font-sans font-bold mb-4 text-white">MARKETPLACE</h4>
+
             <ul className="space-y-2 font-mono text-xs text-gray-500">
               <li>
                 <Link href="/marketplace" className="hover:text-yuzu transition-colors">
@@ -64,6 +65,16 @@ const Footer = ({ transparent = false }: FooterProps) => {
                 </a>
               </li>
             </ul>
+          </div>
+          <div>
+            <h4 className="font-sans font-bold mb-4 text-white">Documentation</h4>
+            <ul className="space-y-2 font-mono text-xs text-gray-500">
+              <li>
+                <a target="_blank" href="https://capydata.gitbook.io/capydata-docs" className="hover:text-yuzu transition-colors">
+                  User docs
+                </a>
+              </li>
+            </ul> 
           </div>
         </div>
 

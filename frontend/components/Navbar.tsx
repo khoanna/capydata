@@ -1,5 +1,5 @@
 "use client";
-import { Store, Upload, User } from "lucide-react";
+import { Store, Upload, User, Database } from "lucide-react";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -54,6 +54,14 @@ const Navbar = () => {
               className="hover:text-yuzu hover:underline decoration-dashed underline-offset-8 transition-all flex items-center gap-2"
             >
               <User className="w-3 h-3" /> PROFILE
+            </Link>
+          )}
+          {account && (
+            <Link
+              href={`https://capydata.gitbook.io/capydata-docs`}
+              className="hover:text-yuzu hover:underline decoration-dashed underline-offset-8 transition-all flex items-center gap-2"
+            >
+              <Database className="w-3 h-3" /> DOCS
             </Link>
           )}
         </div>
