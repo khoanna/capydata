@@ -5,6 +5,7 @@ import Hero from "@/components/Home/Hero";
 import Stats from "@/components/Home/Stats";
 import TopDataset from "@/components/Home/TopDataset";
 import WhyUs from "@/components/Home/WhyUs";
+import DemoVideo from "@/components/Home/DemoVideo";
 import ScrollToTop from "@/components/ScrollToTop";
 
 export default function Home() {
@@ -14,6 +15,7 @@ export default function Home() {
       <Stats />
       <TopDataset />
       <Flow />
+      <DemoVideo />
       <WhyUs />
       <ScrollToTop />
     </>

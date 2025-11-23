@@ -263,6 +263,51 @@
       box-shadow: 0 0 0px transparent;
     }
   }
+
+  /* DemoVideo Orbital Ring Animations */
+  @keyframes orbit-spin-slow {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  @keyframes orbit-spin-medium {
+    0% { transform: rotate(360deg); }
+    100% { transform: rotate(0deg); }
+  }
+
+  @keyframes orbit-spin-fast {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  @keyframes scanline-sweep {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(100%); }
+  }
+
+  @keyframes terminal-cursor {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  @keyframes hologram-glitch {
+    0%, 90%, 100% {
+      transform: translate(0, 0);
+      filter: hue-rotate(0deg);
+    }
+    92% {
+      transform: translate(-2px, 2px);
+      filter: hue-rotate(90deg);
+    }
+    94% {
+      transform: translate(2px, -2px);
+      filter: hue-rotate(-90deg);
+    }
+    96% {
+      transform: translate(-1px, 1px);
+      filter: hue-rotate(45deg);
+    }
+  }
 }
 
 body {

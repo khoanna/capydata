@@ -12,10 +12,10 @@ const Hero = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           {/* Text Content */}
           <div className="lg:col-span-6 space-y-8 order-2 lg:order-1">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 border border-yuzu/30 rounded-full bg-yuzu/5 text-yuzu font-mono text-xs font-bold tracking-wide reveal">
+            {/* <div className="inline-flex items-center gap-2 px-4 py-1.5 border border-yuzu/30 rounded-full bg-yuzu/5 text-yuzu font-mono text-xs font-bold tracking-wide reveal">
               <span className="w-2 h-2 rounded-full bg-yuzu animate-pulse"></span>
               MARKETPLACE V3.0 LIVE
-            </div>
+            </div> */}
 
             <h1 className="text-6xl md:text-8xl font-sans font-bold leading-[0.9] tracking-tight reveal delay-100 text-white">
               YOUR DATA.<br />

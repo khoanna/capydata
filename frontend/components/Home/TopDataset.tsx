@@ -143,7 +143,7 @@ const TopDataset = () => {
             </div>
 
             <div className="relative z-10 flex justify-between items-end border-t border-white/10 pt-3 mt-auto">
-              <span className="font-mono text-xs text-gray-500">/month</span>
+              {/* <span className="font-mono text-xs text-gray-500">/month</span> */}
               <span className="font-mono text-lg font-bold text-white">{formatPrice(listing3?.price || 0)}</span>
             </div>
           </div>
