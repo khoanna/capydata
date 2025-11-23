@@ -56,7 +56,7 @@ const Navbar = () => {
               <User className="w-3 h-3" /> PROFILE
             </Link>
           )}
-          {account && (
+          {(
             <Link
               href={`https://capydata.gitbook.io/capydata-docs`}
               className="hover:text-yuzu hover:underline decoration-dashed underline-offset-8 transition-all flex items-center gap-2"
