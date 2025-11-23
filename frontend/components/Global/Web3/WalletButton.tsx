@@ -267,7 +267,7 @@ export function WalletButton() {
           <div className="p-4 border-b border-white/10">
             <div className="flex items-center gap-3 mb-3">
               <div className="w-12 h-12 rounded-full bg-gradient-yuzu-hydro flex items-center justify-center">
-                <User className="w-6 h-6 text-black" />
+                <User className="w-6 h-6 text-white" />
               </div>
               <div className="flex-1">
                 <p className="font-mono text-xs text-gray-400 mb-1">
