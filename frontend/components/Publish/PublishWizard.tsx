@@ -196,7 +196,7 @@ const PublishWizard = () => {
 
         {/* Active Progress Line with Smooth Gradient */}
         <div
-          className="absolute top-1/2 left-0 h-1 -translate-y-1/2 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] shadow-[0_0_10px_rgba(0,240,255,0.5)]"
+          className="absolute top-1/2 left-0 h-1 -translate-y-1/2 transition-all duration-500 ease-in-out shadow-[0_0_10px_rgba(0,240,255,0.5)]"
           style={{
             width: `${((currentStep - 1) / (steps.length - 1)) * 100}%`,
             background: 'linear-gradient(90deg, #00F0FF, #FFAA00)'

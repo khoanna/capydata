@@ -1,7 +1,7 @@
 "use client";
 import { Check, Clock, Download, ExternalLink, Eye, Inbox, Info, RotateCcw, Search } from "lucide-react";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { formatPrice, timeAgo } from "@/lib/utils";
 import Badge from "@/components/Common/Badge";
 import Button from "@/components/Common/Button";
@@ -10,6 +10,7 @@ import { useAppContext } from "@/context/AppContext";
 import { useCurrentAccount } from "@mysten/dapp-kit";
 import type { Asset } from "@/type/Item";
 import useMarketplace from "@/hooks/useMarketplace";
+import { useToast } from "@/hooks/useToast";
 
 interface DownloadsTabProps {
   address: string;
@@ -21,6 +22,7 @@ const DownloadsTab = ({ address }: DownloadsTabProps) => {
   const { allListings, userDatasets } = useAppContext();
   const {getFile} = useMarketplace();
   const currentAccount = useCurrentAccount();
+  const { addToast } = useToast();
 
   const isOwnProfile = currentAccount?.address === address;
 
@@ -50,8 +52,7 @@ const DownloadsTab = ({ address }: DownloadsTabProps) => {
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Error downloading file:', error);
-      alert('Failed to download file. Please try again.');
+      addToast("This file is expired on Walrus and no more available for download.", "error");
     } finally {
       setDownloadingId(null);
     }

@@ -11,7 +11,7 @@ export default function MarketplacePage() {
   const { allListings, appLoading } = useAppContext();
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState<"recent" | "popular" | "price">("popular");
+  const [sortBy, setSortBy] = useState<"recent" | "popular" | "price">("recent");
   const [showFilters, setShowFilters] = useState(true);
   const [minPrice, setMinPrice] = useState<number | undefined>(undefined);
   const [maxPrice, setMaxPrice] = useState<number | undefined>(undefined);
@@ -136,6 +136,7 @@ export default function MarketplacePage() {
               onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
               className="px-4 py-3 glass-input rounded-lg font-mono text-sm cursor-pointer"
             >
+              <option value="recent">Most Recent</option>
               <option value="popular">Most Popular</option>
               <option value="price">Price: Low to High</option>
             </select>

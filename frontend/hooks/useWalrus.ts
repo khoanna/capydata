@@ -7,7 +7,6 @@ import {
 } from "@mysten/dapp-kit";
 import {useEffect, useState} from "react";
 import type {WalrusClient} from "@mysten/walrus";
-import {log} from "console";
 
 type WalrusModule = typeof import("@mysten/walrus");
 type ExtendedSuiClient = ReturnType<typeof useSuiClient> & {
@@ -71,7 +70,7 @@ export default function useWalrus() {
 
     await flow.encode();
     const registerTx = flow.register({
-      epochs: 5,
+      epochs: 30,
       owner: address,
       deletable: true,
     });
@@ -88,10 +87,7 @@ export default function useWalrus() {
     if (!isReady || !suiClient) {
       throw new Error("Walrus SDK not ready yet");
     }
-
     const fileData = await suiClient.walrus.readBlob({blobId});
-    console.log("Walrus File", fileData);
-
     return fileData;
   };
 

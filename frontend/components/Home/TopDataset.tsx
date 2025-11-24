@@ -9,9 +9,9 @@ const TopDataset = () => {
   const router = useRouter();
   const { allListings } = useAppContext();
   
-  // Take top 4 listings by amount_sold (most popular)
+  // Take top 4 newest listings by release_date
   const topDatasets = allListings
-    ?.sort((a, b) => (b.amount_sold || 0) - (a.amount_sold || 0))
+    ?.sort((a, b) => (b.release_date || 0) - (a.release_date || 0))
     .slice(0, 4) || [];
   const [listing1, listing2, listing3, listing4] = topDatasets;
   return (
@@ -20,13 +20,13 @@ const TopDataset = () => {
         <div className="flex flex-col md:flex-row justify-between items-end mb-12 reveal gap-4">
           <div>
             <h2 className="text-4xl font-sans font-bold mb-2 flex items-center gap-3">
-                TOP DATASETS
+                NEWEST DATASETS
               <span className="text-sm font-mono font-normal text-gray-500 bg-white/5 px-2 py-1 rounded border border-white/10">
                 LIVE
               </span>
             </h2>
             <p className="font-mono text-gray-500 text-sm max-w-md">
-              High-quality data streams curated by the community. Dive in.
+              Fresh data just added to the marketplace. Be the first to explore.
             </p>
           </div>
         </div>
@@ -45,7 +45,7 @@ const TopDataset = () => {
                 <span className="text-7xl font-sans font-bold text-white/10 leading-none">01</span>
                 <div className="flex gap-2">
                   <span className="px-3 py-1.5 bg-hydro/20 text-hydro border border-hydro/30 text-[10px] font-mono font-bold uppercase tracking-wider rounded">
-                    Bestseller
+                    New
                   </span>
                   <span className="px-3 py-1.5 bg-white/10 text-gray-300 border border-white/10 text-[10px] font-mono font-bold uppercase tracking-wider rounded">
                     {listing1?.amount_sold || 0} Sales
