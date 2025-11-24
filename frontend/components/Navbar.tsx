@@ -58,6 +58,7 @@ const Navbar = () => {
           )}
           {(
             <Link
+              target="_blank"
               href={`https://capydata.gitbook.io/capydata-docs`}
               className="hover:text-yuzu hover:underline decoration-dashed underline-offset-8 transition-all flex items-center gap-2"
             >

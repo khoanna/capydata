@@ -25,7 +25,8 @@ export default function useSeal() {
 
   // Get current account and wallet
   const {currentWallet} = useCurrentWallet();
-  const address = useCurrentAccount()?.address || "";
+  const currentAccount = useCurrentAccount();
+  const address = currentAccount?.address || "";
 
   const {mutateAsync: signAndExecuteTransaction} =
     useSignAndExecuteTransaction();
@@ -62,8 +63,8 @@ export default function useSeal() {
       "sui:signPersonalMessage"
     ]?.signPersonalMessage({
       message,
-      account: currentWallet.accounts[0],
-      chain: currentWallet.chains[0],
+      account: currentAccount!,
+      chain: currentAccount?.chains[0],
     });
 
     const signature = result?.signature || "";

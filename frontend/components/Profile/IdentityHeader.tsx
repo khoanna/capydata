@@ -4,8 +4,6 @@ import { Calendar, CheckCircle, Copy, Github, Globe, Settings, Share2, Star, Twi
 import { truncateAddress, stringToColor, copyToClipboard } from "@/lib/utils";
 import { useToast } from "@/hooks/useToast";
 import Badge from "@/components/Common/Badge";
-import Button from "@/components/Common/Button";
-import { useCurrentAccount } from "@mysten/dapp-kit";
 import { useAppContext } from "@/context/AppContext";
 
 interface IdentityHeaderProps {
@@ -14,9 +12,6 @@ interface IdentityHeaderProps {
 
 const IdentityHeader = ({ address }: IdentityHeaderProps) => {
   const { addToast } = useToast();
-  const currentAccount = useCurrentAccount();
-  const isOwnProfile = currentAccount?.address === address;
-
 
   // Generate avatar gradient from address
   const avatarGradient = stringToColor(address);
@@ -27,8 +22,9 @@ const IdentityHeader = ({ address }: IdentityHeaderProps) => {
   const publishedAssets = allListings?.filter((asset) => asset.owner === address) || [];
 
   const publishedCount = publishedAssets.length;
-  const downloads = publishedAssets.reduce((sum, a) => sum + (a.amount_sold || 0), 0);
-  const earned = publishedAssets.reduce((sum, a) => sum + (a.price || 0) * (a.amount_sold || 0), 0);
+  const downloads = publishedAssets.reduce((sum, a) => Number(sum) + (Number(a.amount_sold) || 0), 0);
+  
+  const earned = publishedAssets.reduce((sum, a) => sum + (a.price || 0) * (Number(a.amount_sold) || 0), 0);
   const reputation = Math.min(
     100,
     Math.round(Math.log10(1 + downloads) * 20 + publishedCount * 3)

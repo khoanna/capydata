@@ -1,8 +1,3 @@
-
-
-
-
-// Filter assets
 export interface FilterOptions {
   tags?: string[];
   search?: string;
