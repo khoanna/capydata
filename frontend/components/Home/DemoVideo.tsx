@@ -33,7 +33,7 @@ export default function DemoVideo() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameRef = useRef<number | undefined>(undefined);
 
-  const videoId = "lNNduEGKTbg";
+  const videoId = "4xkt6RLwzFU";
 
   // Load YouTube IFrame API
   useEffect(() => {
