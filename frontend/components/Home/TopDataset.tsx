@@ -35,7 +35,7 @@ const TopDataset = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[280px] reveal delay-100">
 
           {/* Card 01: Tall Card (1 col × 2 rows) - Students Performance in Exams */}
-          <div className="md:row-span-2 glass-panel p-10 rounded-2xl hover-capy transition-all duration-300 relative overflow-hidden group flex flex-col justify-between cursor-pointer" onClick={() => listing1 && router.push(`item/${listing1.id.id}`)}>
+          <div className="md:row-span-2 glass-panel p-10 rounded-2xl hover-capy transition-all duration-300 relative overflow-hidden group flex flex-col justify-between cursor-pointer" onClick={() => listing1 && router.push(`item/?id=${listing1.id.id}`)}>
             <div className="absolute -right-10 -top-10 opacity-10 group-hover:opacity-20 transition-opacity">
               <Globe2 className="w-48 h-48 text-hydro" />
             </div>
@@ -85,7 +85,7 @@ const TopDataset = () => {
           </div>
 
           {/* Card 02: Wide Card (2 cols × 1 row) - {listing2?.title} */}
-          <div className="md:col-span-2 glass-panel p-8 rounded-2xl hover-capy transition-all duration-300 group cursor-pointer relative overflow-hidden" onClick={() => listing2 && router.push(`item/${listing2.id.id}`)}>
+          <div className="md:col-span-2 glass-panel p-8 rounded-2xl hover-capy transition-all duration-300 group cursor-pointer relative overflow-hidden" onClick={() => listing2 && router.push(`item/?id=${listing2.id.id}`)}>
             <div className="absolute top-0 right-0 w-40 h-40 bg-yuzu/10 blur-3xl rounded-full"></div>
 
             <div className="relative z-10">
@@ -113,7 +113,7 @@ const TopDataset = () => {
           </div>
 
           {/* Card 03: Small Card (1 col × 1 row) - Social Sentiment */}
-          <div className="glass-panel p-8 rounded-2xl hover-capy transition-all duration-300 flex flex-col justify-between group cursor-pointer relative overflow-hidden" onClick={() => listing3 && router.push(`item/${listing3.id.id}`)}>
+          <div className="glass-panel p-8 rounded-2xl hover-capy transition-all duration-300 flex flex-col justify-between group cursor-pointer relative overflow-hidden" onClick={() => listing3 && router.push(`item/?id=${listing3.id.id}`)}>
             <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/10 blur-2xl rounded-full"></div>
 
             <div className="relative z-10">
@@ -138,7 +138,7 @@ const TopDataset = () => {
           </div>
 
           {/* Card 04: Small Card (1 col × 1 row) - Stock Market */}
-          <div className="glass-panel p-8 rounded-2xl hover-capy transition-all duration-300 flex flex-col justify-between group cursor-pointer relative overflow-hidden" onClick={() => listing4 && router.push(`item/${listing4.id.id}`)}>
+          <div className="glass-panel p-8 rounded-2xl hover-capy transition-all duration-300 flex flex-col justify-between group cursor-pointer relative overflow-hidden" onClick={() => listing4 && router.push(`item/?id=${listing4.id.id}`)}>
             <div className="absolute top-0 right-0 w-24 h-24 bg-grass/10 blur-2xl rounded-full"></div>
 
             <div className="relative z-10">
