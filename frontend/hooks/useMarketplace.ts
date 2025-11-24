@@ -174,7 +174,7 @@ export default function useMarketplace() {
       });
 
       if (coins.data.length === 0) {
-        throw new Error("No SUI coins found");
+        throw new Error("Insufficient balance!" );
       }
 
       const totalBalance = coins.data.reduce(
