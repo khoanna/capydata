@@ -26,7 +26,7 @@ export default function useSeal() {
   // Get current account and wallet
   const {currentWallet} = useCurrentWallet();
   const currentAccount = useCurrentAccount();
-  const address = currentAccount?.address || "";
+  const address = useCurrentAccount()?.address || "";
 
   const {mutateAsync: signAndExecuteTransaction} =
     useSignAndExecuteTransaction();

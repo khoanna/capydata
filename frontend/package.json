@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "deploy:walrus:testnet": "pnpm build && pnpx walrus-sites-deploy ./out -n testnet -e 100 -o .env.local -b",
+    "deploy:walrus:mainnet": "pnpm build && pnpx walrus-sites-deploy ./out -n mainnet -e 53 -o .env.local -b"
   },
   "dependencies": {
     "@mysten/dapp-kit": "^0.19.9",
@@ -26,7 +28,8 @@
     "recharts": "^3.4.1",
     "three": "^0.181.2",
     "viem": "^2.39.3",
-    "wagmi": "^2.19.4"
+    "wagmi": "^2.19.4",
+    "walrus-sites-deploy": "^0.1.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

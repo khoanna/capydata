@@ -36,7 +36,7 @@ const AssetCard = ({ asset }: AssetCardProps) => {
   };
 
   return (
-    <Link href={`/item/${asset.id.id}`}>
+    <Link href={`/item?id=${asset.id.id}`}>
       <Card
         variant="glass"
         hover

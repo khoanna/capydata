@@ -50,7 +50,7 @@ const Navbar = () => {
           </Link>
           {account && (
             <Link
-              href={`/profile/${account.address}`}
+              href={`/profile?address=${account.address}`}
               className="hover:text-yuzu hover:underline decoration-dashed underline-offset-8 transition-all flex items-center gap-2"
             >
               <User className="w-3 h-3" /> PROFILE

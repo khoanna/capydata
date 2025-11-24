@@ -342,7 +342,7 @@ export function WalletButton() {
             <div className="border-t border-white/10 my-2"></div>
 
             <a
-              href={`/profile/${account.address}`}
+              href={`/profile?address=${account.address}`}
               className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/5 transition-all group"
             >
               <User className="w-4 h-4 text-gray-400 group-hover:text-yuzu" />
@@ -352,7 +352,7 @@ export function WalletButton() {
             </a>
 
             <a
-              href={`/profile/${account.address}#published`}
+              href={`/profile?address=${account.address}#published`}
               className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/5 transition-all group"
             >
               <Database className="w-4 h-4 text-gray-400 group-hover:text-yuzu" />
@@ -362,7 +362,7 @@ export function WalletButton() {
             </a>
 
             <a
-              href={`/profile/${account.address}#downloads`}
+              href={`/profile?address=${account.address}#downloads`}
               className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/5 transition-all group"
             >
               <Download className="w-4 h-4 text-gray-400 group-hover:text-yuzu" />

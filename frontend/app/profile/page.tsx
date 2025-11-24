@@ -1,19 +1,22 @@
 "use client";
 
-import { use, useState } from "react";
+import { useState, Suspense } from "react";
 import { UploadCloud, Download, TrendingUp } from "lucide-react";
+import { useSearchParams, notFound } from "next/navigation";
 import IdentityHeader from "@/components/Profile/IdentityHeader";
 import PublishedTab from "@/components/Profile/PublishedTab";
 import DownloadsTab from "@/components/Profile/DownloadsTab";
 import FinancialsTab from "@/components/Profile/FinancialsTab";
 
-export default function ProfilePage({
-  params,
-}: {
-  params: Promise<{ address: string }>;
-}) {
-  const { address } = use(params);
+function ProfileContent() {
+  const searchParams = useSearchParams();
+  const address = searchParams.get("address");
+
   const [activeTab, setActiveTab] = useState<"published" | "downloads" | "financials">("published");
+
+  if (!address) {
+    notFound();
+  }
 
   const tabs = [
     { id: "published" as const, label: "Published", icon: <UploadCloud className="w-4 h-4" /> },
@@ -60,5 +63,24 @@ export default function ProfilePage({
         </div>
       </div>
     </main>
+  );
+}
+
+export default function ProfilePage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen pt-28 pb-20 bg-void">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex items-center justify-center py-20">
+            <div className="text-center">
+              <div className="w-12 h-12 border-4 border-yuzu border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="font-mono text-sm text-gray-400">Loading...</p>
+            </div>
+          </div>
+        </div>
+      </main>
+    }>
+      <ProfileContent />
+    </Suspense>
   );
 }

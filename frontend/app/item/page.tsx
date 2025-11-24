@@ -1,8 +1,8 @@
 "use client";
 
-import { use, useState } from "react";
+import { useState, Suspense } from "react";
 import { ChevronRight, Sparkles, ArrowRight } from "lucide-react";
-import { notFound } from "next/navigation";
+import { notFound, useSearchParams } from "next/navigation";
 import SimpleAssetHeader from "@/components/ItemDetail/SimpleAssetHeader";
 import Link from "next/link";
 import { useAppContext } from "@/context/AppContext";
@@ -10,18 +10,20 @@ import useMarketplace from "@/hooks/useMarketplace";
 import { useCurrentAccount } from "@mysten/dapp-kit";
 import { useToast } from "@/hooks/useToast";
 
-export default function ItemDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = use(params);
+function ItemDetailContent() {
+  const searchParams = useSearchParams();
+  const id = searchParams.get("id");
+
   const { allListings, appLoading, userDatasets, fetchUserDatasets } = useAppContext();
   const { buyDataset, loading } = useMarketplace();
   const currentAccount = useCurrentAccount();
   const { addToast } = useToast();
 
   const asset = allListings?.find((item) => item.id.id === id);
+
+  if (!id) {
+    notFound();
+  }
 
   if (appLoading || !allListings) {
     return (
@@ -43,7 +45,7 @@ export default function ItemDetailPage({
   }
 
   const isOwner = currentAccount?.address === asset.owner;
-  
+
   const hasPurchased = userDatasets?.includes(id) || false;
 
   const handlePurchase = async () => {
@@ -92,8 +94,8 @@ export default function ItemDetailPage({
         </div>
 
         <div className="space-y-8">
-          <SimpleAssetHeader 
-            asset={asset} 
+          <SimpleAssetHeader
+            asset={asset}
             onPurchase={!isOwner && !hasPurchased ? handlePurchase : undefined}
             loading={loading}
             isOwner={isOwner}
@@ -187,5 +189,24 @@ export default function ItemDetailPage({
         </div>
       </div>
     </main>
+  );
+}
+
+export default function ItemDetailPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen pt-28 pb-20 bg-void">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex items-center justify-center py-20">
+            <div className="text-center">
+              <div className="w-12 h-12 border-4 border-yuzu border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="font-mono text-sm text-gray-400">Loading...</p>
+            </div>
+          </div>
+        </div>
+      </main>
+    }>
+      <ItemDetailContent />
+    </Suspense>
   );
 }

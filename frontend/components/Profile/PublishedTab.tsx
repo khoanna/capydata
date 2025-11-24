@@ -205,7 +205,7 @@ const PublishedTab = ({ address }: PublishedTabProps) => {
                 {sortedAssets[0].amount_sold} sales • {sortedAssets[0].price * sortedAssets[0].amount_sold} SUI revenue
               </p>
             </div>
-            <Link href={`/item/${sortedAssets[0].id.id}`}>
+            <Link href={`/item?id=${sortedAssets[0].id.id}`}>
               <Button variant="outline" size="sm">
                 View Details
                 <ArrowRight className="w-4 h-4" />
