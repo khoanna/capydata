@@ -13,13 +13,12 @@ const Toast = ({ toast, onClose }: ToastProps) => {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // Trigger entrance animation
     setTimeout(() => setIsVisible(true), 10);
   }, []);
 
   const handleClose = () => {
     setIsVisible(false);
-    setTimeout(onClose, 300); // Wait for exit animation
+    setTimeout(onClose, 300); 
   };
 
   const typeConfig = {
