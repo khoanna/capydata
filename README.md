@@ -98,17 +98,6 @@ Install dependencies
 ```bash
 pnpm install
 ```
-
-Environment variables
-
-Create a `.env.local` in `frontend/` with at least:
-
-```env
-NEXT_PUBLIC_WALRUS_SERVERS="0x...,..."    # Walrus server object IDs (comma-separated)
-NEXT_PUBLIC_SEAL_PACKAGE_ID="0x..."      # PACKAGE_ID used by SEAL and contracts
-NEXT_PUBLIC_MARKETPLACE_ID="0x..."       # Marketplace Move object id (deployed)
-```
-
 Walrus setup
 
 1. Ensure your Walrus server object IDs are set in `lib/constants.ts` or in env.
