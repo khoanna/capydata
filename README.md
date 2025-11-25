@@ -89,8 +89,8 @@ Requirements
 Clone
 
 ```bash
-git clone https://github.com/<your-org>/decentralized-data-marketplace-.git
-cd decentralized-data-marketplace-
+git clone https://github.com/<your-org>/capydata.git
+cd capydata
 ```
 
 Install dependencies
