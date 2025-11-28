@@ -96,6 +96,7 @@ cd capydata
 Install dependencies
 
 ```bash
+cd frontend
 pnpm install
 ```
 Walrus setup
